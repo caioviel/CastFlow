@@ -34,6 +34,9 @@ class Router:
                 
     def toJson(self):
         return json.dumps(self.internal_toJson())
+    
+    def __str__(self):
+        return self.toJson();
 
 class RouterFactory:
     def createRouter(self, myId, ports):
@@ -63,6 +66,9 @@ class Link:
         
     def toJson(self):
         return json.dumps(self.internal_toJson())
+    
+    def __str__(self):
+        return self.toJson();
         
         
 class LinkFactory:
@@ -95,6 +101,9 @@ class Host:
     
     def toJson(self):
         return json.dumps(self.internal_toJson())
+    
+    def __str__(self):
+        return self.toJson();
     
 class HostFactory:
     def createHost(self, myId, router):
