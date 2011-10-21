@@ -4,7 +4,7 @@ Created on Oct 20, 2011
 @author: caioviel
 '''
 
-from Model import Host, Link, Router, LinkFactory, HostFactory
+from commum.Model import Host, Link, Router, LinkFactory, HostFactory
 
 class BriteParser:
     def __init__(self, filename):

@@ -4,21 +4,14 @@ Created on Oct 20, 2011
 @author: caioviel
 '''
 
-
-from Model import *
-from BriteParser import BriteParser
+from topologyserver.TopologyManager import *
 
 if __name__ == '__main__':
-    parser = BriteParser('brite1.brite')
-    parser.doParse()
-    topology = Topology()
-    topology.hosts = parser.hosts
-    topology.links = parser.links
-    topology.routers = parser.routers
+    topMng = TopologyManager().importTopologyFromBrite('brite1.brite')
     
-    jsonMessage = topology.toJson()
-    topology = TopologyFactory().decodeJson(jsonMessage)
-    print jsonMessage
+    
+    
+    
     
     
     

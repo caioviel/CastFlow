@@ -175,4 +175,79 @@ class TopologyFactory:
     def decodeJson(self, jsonStr):
         objs = json.loads(jsonStr)
         return self.internal_decodeJson(objs)
+    
+class Group:
+    def __init__(self, source=-1):
+        self.hosts = []
+        self.source = source
+        pass
+
+    def internal_toJson(self):
+        hts = []
+        for h in self.hosts:
+            rts.append(r.internal_toJson())
+            
+        return {'group' :
+                            {'source' : self.source,
+                             'hosts' : hts} }
+        
+    def toJson(self):
+        return json.dumps(self.internal_toJson())
+    
+class GroupFactory:
+    def internal_decodeJson(self, objs):
+        hosts = []
+
+        factory = HostFactory()
+        array_list = objs['group']['hosts']
+        for item in array_list:
+            hosts.append(factory.internal_decodeJson(item))
+
+        g = Group()
+        g.source = objs['group']['source']
+        g.hosts = hosts
+        return g
+    
+    def decodeJson(self, jsonStr):
+        objs = json.loads(jsonStr)
+        return self.internal_decodeJson(objs)
+    
+class Event:
+    def __init__(self, myid=-1, type='entry'):
+        self.id = myid
+        self.type = type
+        self.hosts = []
+        pass
+
+    def internal_toJson(self):
+        hts = []
+        for h in self.hosts:
+            rts.append(r.internal_toJson())
+            
+        return {'event' :
+                            {'id' : self.id, 'type' : self.type,
+                             'hosts' : hts} }
+        
+    def toJson(self):
+        return json.dumps(self.internal_toJson())
+    
+class EventFactory:
+    def internal_decodeJson(self, objs):
+        hosts = []
+
+        factory = HostFactory()
+        array_list = objs['event']['hosts']
+        for item in array_list:
+            hosts.append(factory.internal_decodeJson(item))
+
+        e = Event()
+        e.id = objs['event']['id']
+        e.type = objs['event']['type']
+        e.hosts = hosts
+        return g
+    
+    def decodeJson(self, jsonStr):
+        objs = json.loads(jsonStr)
+        return self.internal_decodeJson(objs)
+    
         
