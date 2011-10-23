@@ -1,7 +1,6 @@
 from commum.util import LongMessageSocket
 from commum.Model import *
 from InternalInterface import InternalInterface
-import socket
 import threading
 
 class ClientHandler(threading.Thread):

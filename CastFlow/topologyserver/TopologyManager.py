@@ -91,9 +91,10 @@ class TopologyManager(threading.Thread):
             threading.Thread.start(self)
             
     def run(self):
+        print 'Starting to generate events...'
         while self.is_running:
             #Dormir um tempo aleatorio seguindo uma distrubuicao normal de media 40 e variancia 15 (em segundos)
-            sleepingTime = numpy.random.normal(40, 15)
+            sleepingTime = numpy.random.normal(40, 20)
             time.sleep(sleepingTime)
             
             #50% de chances de ser um evento de entrada / 50% de ser um evento de saida
@@ -104,14 +105,16 @@ class TopologyManager(threading.Thread):
             else: #Evento de saida
                 event = self.generateExitEvent()
             
-            self.eventListener.notifyEvent(event)
+            if len(event.hosts) > 0:
+                print 'Event generated.'
+                self.eventListener.notifyEvent(event)
             
     def generateEntryEvent(self):
         entering_hosts = []
         entering_hosts_number = numpy.random.poisson(2);
         while len(entering_hosts) < entering_hosts_number:
             host = self.selectRandomHost(self.inactive_hosts)
-            if host not in self.entering_host:
+            if host not in entering_hosts:
                 entering_hosts.append(host)
                 
         for host in entering_hosts:
@@ -126,7 +129,7 @@ class TopologyManager(threading.Thread):
         exiting_hosts_number = numpy.random.poisson(1);
         while len(exiting_hosts) < exiting_hosts_number:
             host = self.selectRandomHost(self.active_hosts)
-            if host not in self.entering_host:
+            if host not in exiting_hosts:
                 exiting_hosts.append(host)
                 
         for host in exiting_hosts:

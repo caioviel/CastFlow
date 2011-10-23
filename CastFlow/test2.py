@@ -78,5 +78,22 @@ if __name__ == '__main__':
     topology = RequestFactory().decodeJson(jsonTopology)
     print 'Parsing Request Start Message ok.'
     
+    #Sending Register for Events Request
+    
+    request.id = 6
+    request.action = request.ACTION.REGISTER_FOR_EVENTS
+    jsonMessage = request.toJson()
+    print 'Sending message: ', jsonMessage
+    
+    clientSocket.send(jsonMessage)
+    
+    #Waiting for Events Messages
+    print 'Waiting for events...'
+    while True:
+        jsonTopology = clientSocket.recv()
+        print 'Message received:', jsonTopology
+        event = EventFactory().decodeJson(jsonTopology)
+        print 'Parsing Event Message ok.'
+    
     clientSocket.close()
     print 'Connection closed.'
