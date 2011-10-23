@@ -4,25 +4,29 @@ Created on Oct 20, 2011
 @author: caioviel
 '''
 
-from topologyserver.TopologyManager import *
-import socket
+from topologyserver.TopologyServer import *
 
 if __name__ == '__main__':
-    topMng = TopologyManager()
-    topMng.importTopologyFromBrite('brite1.brite')
+        server = TopologyServer('brite1.brite')
+        server.startListen()
+        
+        
+if __name__ == '__main__':
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect( ('localhost', 8887) )
     
-    serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serverSocket.bind(8888)
+    clientSocket = LongMessageSocket(s)
     
-    serverSocket.listen(5)
-    while True:
-        clientSocket, address = serverSocket.accept()
-        ct = client_thread(clientSocket)
+    request = Request()
+    request.id = 0
+    request.action = request.ACTION.GET_TOPOLOGY
+    jsonMessage = request.toJson()
     
+    clientSocket.send(jsonMessage)
+    jsonTopology = clientSocket.recv()
+    print jsonTopology
     
-    
-    
-    
-    
-    
+    clientSocket.close()
+        
+        
     

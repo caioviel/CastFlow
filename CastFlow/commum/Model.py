@@ -5,6 +5,11 @@ Created on Oct 20, 2011
 '''
 import json
 
+def enum(*sequential, **named):
+    enums = dict(zip(sequential, range(len(sequential))), **named)
+    return type('Enum', (), enums)
+
+
 class Router:
     '''
     classdocs
@@ -152,9 +157,6 @@ class Topology:
         
         
 class TopologyFactory:
-    def __init__(self):
-        pass
-
     def internal_decodeJson(self, objs):
         hosts = []
         routers = []
@@ -194,7 +196,7 @@ class Group:
     def internal_toJson(self):
         hts = []
         for h in self.hosts:
-            rts.append(r.internal_toJson())
+            hts.append(h.internal_toJson())
             
         return {'group' :
                             {'source' : self.source,
@@ -222,16 +224,16 @@ class GroupFactory:
         return self.internal_decodeJson(objs)
     
 class Event:
-    def __init__(self, myid=-1, type='entry'):
+    def __init__(self, myid=-1, mytype='entry'):
         self.id = myid
-        self.type = type
+        self.type = mytype
         self.hosts = []
         pass
 
     def internal_toJson(self):
         hts = []
         for h in self.hosts:
-            rts.append(r.internal_toJson())
+            hts.append(h.internal_toJson())
             
         return {'event' :
                             {'id' : self.id, 'type' : self.type,
@@ -253,7 +255,64 @@ class EventFactory:
         e.id = objs['event']['id']
         e.type = objs['event']['type']
         e.hosts = hosts
-        return g
+        return e
+    
+    def decodeJson(self, jsonStr):
+        objs = json.loads(jsonStr)
+        return self.internal_decodeJson(objs)
+    
+class Request:
+    ACTION = enum('GET_TOPOLOGY', 'GET_COMPLETE_GROUP', 
+                  'GET_GROUP', 'REGISTER_FOR_EVENTS', 'WAIT_START', 'START', 'NONE')
+    
+    def __init__(self, myid = -1, action = ACTION.NONE):
+        self.id = myid
+        self.action = action
+        
+    def internal_toJson(self):
+        return {'request' : {'id' : self.id, 'action' : self.ACTION_to_string(self.action)} }
+        
+    def ACTION_to_string(self, action):
+        if action == self.ACTION.GET_TOPOLOGY:
+            return 'getTopology'
+        elif action == self.ACTION.GET_COMPLETE_GROUP:
+            return 'getCompleteGroup'
+        elif action == self.ACTION.GET_GROUP:
+            return 'getGroup'
+        elif action == self.ACTION.REGISTER_FOR_EVENTS:
+            return 'registerForEvents'
+        elif action == self.ACTION.WAIT_START:
+            return 'waitStart'
+        elif action == self.ACTION.START:
+            return 'start'
+        else:
+            return 'none'
+    
+    def string_to_ACTION(self, actionStr):
+        if actionStr == 'getTopology':
+            return self.ACTION.GET_TOPOLOGY
+        elif actionStr == 'getCompleteGroup':
+            return self.ACTION.GET_COMPLETE_GROUP
+        elif actionStr == 'getGroup':
+            return self.ACTION.GET_GROUP
+        elif actionStr == 'registerForEvents':
+            return self.ACTION.REGISTER_FOR_EVENTS
+        elif actionStr == 'waitStart':
+            return self.ACTION.WAIT_START
+        elif actionStr == 'start':
+            return self.ACTION.START
+        else:
+            return self.ACTION.NONE
+        
+    def toJson(self):
+        return json.dumps(self.internal_toJson())
+    
+class RequestFactory:
+    def internal_decodeJson(self, objs):
+        request = Request()
+        request.id = objs['request']['id']
+        request.action = request.string_to_ACTION( objs['request']['action'] )
+        return request
     
     def decodeJson(self, jsonStr):
         objs = json.loads(jsonStr)
