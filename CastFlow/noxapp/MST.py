@@ -30,6 +30,7 @@ class MST:
         
         clientSocket.send( jsonMessage )
         jsonTopology = clientSocket.recv()
+        clientSocket.close()
         self.topology = TopologyFactory().decodeJson( jsonTopology )
         return self.topology
         
@@ -80,6 +81,3 @@ class MST:
         self.topology = topology
         self.nodes, self.edges = self.parseTopology()
         return self.prim( self.nodes, self.edges )
-
-x = MST()
-print x.getRemoteMST()
