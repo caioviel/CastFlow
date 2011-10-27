@@ -3,7 +3,7 @@ Created on Oct 26, 2011
 
 @author: tiagopomponet
 '''
-from commum.Model import Request, GroupFactory, Group, Host
+from commum.Model import Request, GroupFactory
 from commum.util import *
 from noxapp.MST import MST
 
