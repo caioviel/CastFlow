@@ -13,6 +13,7 @@ class Paths:
         self.t = MST()
         self.topology = self.t.getRemoteMST()
         self.topology = self.dupPaths()
+        pass
 
     def connect(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -41,9 +42,7 @@ class Paths:
         self.source = self.group.source
         for h in self.group.hosts:
             opath = []
-            opath2 = self.getPath(self.source, h.id, opath)
-            print opath2
-            paths.append(opath2)
+            paths.append(self.getPath(self.source, h.id, opath))
         return paths
     
     def belong(self, element, vlist):
@@ -83,3 +82,10 @@ class Paths:
     def getPaths(self):
         self.group = self.getGroup()
         return self.parseGroup()
+    
+    def prepareInstall(self, paths):
+        s = set()
+        for p in paths:
+            for i in range(len(p)-1):
+                s.add((p[i],p[i+1]))
+        return s
