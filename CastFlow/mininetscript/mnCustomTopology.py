@@ -2,6 +2,7 @@
 
 Create a custom topology from a list of switches, hosts and links (edges)
 
+@author: arthurgodoy
 """
 from commum.Model import *
 from commum.util import *

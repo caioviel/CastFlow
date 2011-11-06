@@ -1,3 +1,7 @@
+"""mininet Custom script
+
+@author: arthurgodoy
+"""
 from mnCustomTopology import *
 
 if __name__ == '__main__':
