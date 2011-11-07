@@ -104,10 +104,13 @@ class mnCustomGroup(threading.Thread):
         topology = RequestFactory().decodeJson(jsonTopology)
         print 'Parsing Request Start Message ok.'
         
-        #Start a iperf server sending packages to the Multicast-Group IP on the source.
-        customTopo.hServer.cmdPrint('iperf -u -s')
-        
-        #Start o iperf -c in each host of the client group.
+        #Start the udpapp client in each host of the client group
         for groupHost in groupTopology:
-            customTopo.hClients[groupHost.id].cmdPrint('iperf -u -b 1M -t 3600 -c 10.200.200.201')
+            customTopo.hClients[groupHost.id].cmdPrint('udpapp -c ' + str( customTopo.hClients[groupHost.id].IP() ) )
+            
+            
+        #Start a udpapp server sending packages to the Multicast-Group IP on the source.
+        customTopo.hServer.cmdPrint('udpapp -s 239.200.200.200')
+        
+        
             

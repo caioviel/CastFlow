@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+"""
+    UdpApp python script
+        Server send udp packets every NSECONDS
+        Client listening the UDP_PORT
+        [Copy to your /usr/bin directory for call in shell]
+
+@author: arthurgodoy
+"""
+import sys
+import socket
+#import datetime
+from time import time, sleep
+
+UDP_PORT=8885 #Port Listening/Sending
+
+NSECONDS=0.030 #Send Period
+
+#Arguments should be 2 or more
+if len( sys.argv ) < 3:
+    print " "
+    print "Usage ="
+    print "      Server:"
+    print "              python udpapp.py -s CLIENT_IP1 CLIENT_IP2 CLIENT_IPN"
+    print "      Client:"
+    print "              python udpapp.py -c HOST_IP"
+    print " "
+
+#Server
+elif sys.argv[1] == "-s":
+    UDP_CLIENTS=sys.argv[2:] #Get the arguments starting from the third
+
+    print "UDP target IP:", UDP_CLIENTS
+    print "UDP target port:", UDP_PORT
+    print "Sending period:", NSECONDS, " seconds"
+
+    sock = socket.socket( socket.AF_INET,        # Internet
+                          socket.SOCK_DGRAM )    # UDP
+
+    #Send each NSECONDS for each client
+    while True:
+        for UDP_IP in UDP_CLIENTS:
+            sock.sendto( repr( time() ) + "     /\\", #str( datetime.datetime.now() ),
+                         (UDP_IP, UDP_PORT) )
+            
+        sleep( NSECONDS )
+
+#Client
+elif sys.argv[1] == "-c":
+    UDP_IP=sys.argv[2]     #Third argument it's the binding IP
+    
+    sock = socket.socket( socket.AF_INET,     # Internet
+                          socket.SOCK_DGRAM )     # UDP
+    sock.bind( (UDP_IP,UDP_PORT) )
+
+    while True:
+        data, addr = sock.recvfrom( 1024 )   # buffer size is 1024 bytes
+        print "received on ", repr( time() ),  "     \\/" ##datetime.datetime.now()
+        print "sended on   ", data
+
+#Ops...
+else:
+    print "Oops..Something bad happened, check your arguments!"
