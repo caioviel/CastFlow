@@ -89,6 +89,10 @@ class Paths:
             for i in range(len(p)-1):
                 s.add((p[i],p[i+1]))
         return s
+    
+    def getTopology(self):
+        return self.topology
+
 ''' uso
 x = Paths()
 print x.prepareInstall(x.getPaths())
