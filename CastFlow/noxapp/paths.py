@@ -84,17 +84,20 @@ class Paths:
         return self.parseGroup()
     
     def prepareInstall(self, paths):
-        s = set()
+        s = []
         for p in paths:
             for i in range(len(p)-1):
-                s.add((p[i],p[i+1]))
+                pair = (p[i],p[i+1])
+                if pair not in s:
+                    s.append(pair)
+                    
+        s.sort()
         return s
     
     def getTopology(self):
         return self.topology
 
-''' uso
+
 x = Paths()
 print x.prepareInstall(x.getPaths())
 
-'''
