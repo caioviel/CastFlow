@@ -15,8 +15,4 @@ if __name__ == '__main__':
         
     server = TopologyServer('brite1.brite')
     server.startListen()
-        
-        
-        
-        
     

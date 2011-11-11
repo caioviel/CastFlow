@@ -163,6 +163,12 @@ class TopologyManager(threading.Thread):
     def getLinkById(self, linkid):
         return self.links[linkid-1]
     
+    def updateHosts(self, hosts):
+        for i in range(len(self.all_hosts)):
+            self.all_hosts[i].ip = hosts[i].ip
+            self.all_hosts[i].mac = hosts[i].mac
+        
+    
     def __calcLinksWeight__(self):
         visitedNodes = []
         nodesToVisit = []

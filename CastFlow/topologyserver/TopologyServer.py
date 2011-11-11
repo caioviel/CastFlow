@@ -71,6 +71,9 @@ class TopologyServer(InternalInterface):
             print 'Client', handler.address, 'is waiting start.'
         else:
             print 'Client', handler.address, 'has been already waiting start.'
+            
+    def updateTopology(self, request):
+        self.topologyManager.updateHosts(request.topology.hosts)
     
     def removeHandler(self, handler):
         if handler in self.startListeners:

@@ -47,6 +47,10 @@ class ClientHandler(threading.Thread):
                 elif request.action == request.ACTION.START:
                     print '\tMessage request(start) received from client', self.address
                     self.request_start(request)
+                    
+                elif request.action == request.ACTION.UPDATE_TOPOLOGY:
+                    print '\Message request(updateTopology) received from client', self.address
+                    self.request_update_topology(request)
                 
                 else:
                     return 'none'
@@ -78,6 +82,9 @@ class ClientHandler(threading.Thread):
         
     def request_start(self, request):
         self.topologyServer.notifyStart(request)
+        
+    def request_update_topology(self, request):
+        self.topologyServer.updateTopology(request)
         
     def notify_client(self, notification):
         jsonMessage = notification.toJson()

@@ -295,14 +295,22 @@ class EventFactory:
     
 class Request:
     ACTION = enum('GET_TOPOLOGY', 'GET_COMPLETE_GROUP', 
-                  'GET_GROUP', 'REGISTER_FOR_EVENTS', 'WAIT_START', 'START', 'NONE')
+                  'GET_GROUP', 'REGISTER_FOR_EVENTS', 'WAIT_START', 'START', 'NONE', 'UPDATE_TOPOLOGY')
     
     def __init__(self, myid = -1, action = ACTION.NONE):
         self.id = myid
         self.action = action
+        self.topology = None
         
     def internal_toJson(self):
-        return {'request' : {'id' : self.id, 'action' : self.ACTION_to_string(self.action)} }
+        if self.action != self.ACTION.UPDATE_TOPOLOGY:
+            print 'Not a request(updateTopology)'
+            return {'request' : {'id' : self.id, 'action' : self.ACTION_to_string(self.action)} }
+        else:
+            print 'A request(updateTopology)'
+            return {'request' : {'id' : self.id, 'action' : self.ACTION_to_string(self.action), 
+                                 'topology' : self.topology.internal_toJson() } }
+    
         
     def ACTION_to_string(self, action):
         if action == self.ACTION.GET_TOPOLOGY:
@@ -317,6 +325,8 @@ class Request:
             return 'waitStart'
         elif action == self.ACTION.START:
             return 'start'
+        elif action == self.ACTION.UPDATE_TOPOLOGY:
+            return 'updateTopology'
         else:
             return 'none'
     
@@ -333,6 +343,8 @@ class Request:
             return self.ACTION.WAIT_START
         elif actionStr == 'start':
             return self.ACTION.START
+        elif actionStr == 'updateTopology':
+            return self.ACTION.UPDATE_TOPOLOGY
         else:
             return self.ACTION.NONE
         
@@ -344,10 +356,12 @@ class RequestFactory:
         request = Request()
         request.id = objs['request']['id']
         request.action = request.string_to_ACTION( objs['request']['action'] )
+        if request.action == request.ACTION.UPDATE_TOPOLOGY:
+                print objs['request']['topology']
+                request.topology = TopologyFactory().internal_decodeJson(objs['request']['topology'])
         return request
     
     def decodeJson(self, jsonStr):
         objs = json.loads(jsonStr)
+        print objs
         return self.internal_decodeJson(objs)
-    
-        

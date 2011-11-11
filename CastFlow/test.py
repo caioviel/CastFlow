@@ -18,7 +18,14 @@ if __name__ == '__main__':
         topology.links = tm.links
         topology.routers = tm.routers
         
-        print topology.toJson()
+        request = Request(5, Request.ACTION.UPDATE_TOPOLOGY)
+        request.topology = topology
+        
+        json = request.toJson()
+        
+        parsedRequest = RequestFactory().decodeJson(json)
+        
+        print parsedRequest.toJson()
         
         
         
