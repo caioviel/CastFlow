@@ -74,6 +74,7 @@ class BriteParser:
             self.hosts.append(host)
             link = LinkFactory().createLink(nextLinkId, router.id, host.id)
             self.links.append(link)
+            host.link = link.id
             nextHostId += 1
             nextLinkId += 1
     
@@ -81,12 +82,12 @@ class BriteParser:
         biggerRouter = len(self.routers)
         for link in self.links:
             if link.node1 <= biggerRouter: #is a router
-                self.routers[link.node1-1].addPort(link.node2)
+                self.routers[link.node1-1].addPort(link.node2, link.id)
             else: #is a host
                 self.hosts[link.node1-51].router = link.node2
                 
             if link.node2 <= biggerRouter: #is a router
-                self.routers[link.node2-1].addPort(link.node1)
+                self.routers[link.node2-1].addPort(link.node1, link.id)
             else: #is a host
                 self.hosts[link.node2-51].router = link.node1
             

@@ -16,10 +16,13 @@ class Router:
     '''
     def __init__(self):
         self.allports = []
+        self.links = []
         self.id = -1
+        self.distanceFromSource = -1
         
-    def addPort(self, nodeid):
+    def addPort(self, nodeid, linkid):
         self.allports.append(nodeid)
+        self.links.append(linkid)
             
     def getNodeByPort(self, port):
         if len(self.allports) > (port -1):
@@ -32,10 +35,27 @@ class Router:
             if self.allports[i] == nodeid:
                 return i+1
         print 'Trying to access a inexistent port.'
+        
+        
+    def getLinkByPort(self, linkid):
+        if len(self.links) > (linkid -1):
+            return self.links[linkid-1]
+        else:
+            print 'Trying to access a inexistent port.'
+            
+    def getLinkByNode(self, nodeid):
+        for i in range( len(self.allports) ):
+            if self.allports[i] == nodeid:
+                return self.links[i]
+        print 'Trying to access a inexistent port.'
             
             
     def internal_toJson(self):
-        return {'router' : {'id' : self.id, 'ports' : self.allports} }
+        ports = []
+        for i in range(len(self.allports)):
+            ports.append( {'port' : {'node' :  self.allports[i], 'link' : self.links[i] } } )
+            
+        return {'router' : {'id' : self.id, 'ports' : ports} }
                 
     def toJson(self):
         return json.dumps(self.internal_toJson())
@@ -57,17 +77,21 @@ class RouterFactory:
     def internal_decodeJson(self, objs):
         router = Router()
         router.id = objs['router']['id']
-        router.ports =  objs['router']['ports']
+        ports =  objs['router']['ports']
+        for port in ports:
+            router.allports.append(port['port']['node'])
+            router.links.append(port['port']['link'])
         return router
     
 class Link:
     def __init__(self):
         self.id = -1
+        self.weight = -1
 
     def internal_toJson(self):
         return {'link' : 
                 {'id' : self.id, 'node1' : self.node1, 
-                 'node2' : self.node2} }
+                 'node2' : self.node2, 'weight' : self.weight} }
         
     def toJson(self):
         return json.dumps(self.internal_toJson())
@@ -89,6 +113,7 @@ class LinkFactory:
         link.id = objs['link']['id']
         link.node1 = objs['link']['node1']
         link.node2 = objs['link']['node2']
+        link.weight = objs['link']['weight']
         return link
     
     def decodeJson(self, jsonStr):
@@ -99,10 +124,14 @@ class LinkFactory:
 class Host:
     def __init__(self):
         self.id = -1
+        self.link = -1
+        self.ip = "0.0.0.0"
+        self.mac = "00:00:00:00:00:00"
+        self.distanceFromSource = -1
         
     def internal_toJson(self):
         return {'host' : 
-                           {'id' : self.id, 'router' : self.router} } 
+                           {'id' : self.id, 'router' : self.router, 'link' : self.link, 'ip' : self.ip, 'mac' : self.mac} } 
     
     def toJson(self):
         return json.dumps(self.internal_toJson())
@@ -121,6 +150,9 @@ class HostFactory:
         host = Host()
         host.id = objs['host']['id']
         host.router = objs['host']['router']
+        host.link = objs['host']['link']
+        host.ip = objs['host']['ip']
+        host.mac = objs['host']['mac']
         return host
         
     def decodeJson(self, jsonStr):
@@ -191,7 +223,7 @@ class Group:
     def __init__(self, source=-1):
         self.hosts = []
         self.source = source
-        pass
+        pass    
 
     def internal_toJson(self):
         hts = []

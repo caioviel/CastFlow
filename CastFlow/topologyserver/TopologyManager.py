@@ -49,6 +49,8 @@ class TopologyManager(threading.Thread):
         
         self.__selectActiveHosts__()
         
+        self.__calcLinksWeight__()
+        
         
     def selectRandomHost(self, hosts):
         host_index = int(numpy.random.uniform(0.0, len(hosts)-1))
@@ -139,4 +141,90 @@ class TopologyManager(threading.Thread):
         event.hosts = exiting_hosts
         return event
     
+    def isHost(self, nodeid):
+        if nodeid > 50:
+            return True
+        else:
+            return False
         
+    def getHostById(self, hostId):
+        if self.isHost(hostId):
+            return self.all_hosts[hostId-51]
+        else:
+            return None
+        
+    def getRouterById(self, routerId):
+        if not self.isHost(routerId):
+            return self.routers[routerId-1]
+        else:
+            print 'Will return None.'
+            return None
+        
+    def getLinkById(self, linkid):
+        return self.links[linkid-1]
+    
+    def __calcLinksWeight__(self):
+        visitedNodes = []
+        nodesToVisit = []
+        source = self.multicast_source
+        link = self.getLinkById(source.link)
+        source.distanceFromSource = 0
+        link.weight = 1
+        node = self.getRouterById(source.router)
+
+        node.distanceFromSource = 1
+        
+        visitedNodes.append(source.id)
+        nodesToVisit.append(node)
+        
+        while len(nodesToVisit) > 0:
+            node = nodesToVisit.pop(0)
+            if node.id in visitedNodes:
+                #It's had already been calculed.
+                continue
+            
+            visitedNodes.append(node.id)
+            
+            if self.isHost(node.id):
+                #it's a host
+                host = node
+                link = self.getLinkById(host.link)
+                if link.weight == -1: 
+                    #The weight for this link hasn't been calculed
+                    link.weight = node.distanceFromSource + 1
+                elif link.weight > node.distanceFromSource + 1:
+                    link.weight = node.distanceFromSource + 1
+                
+                router = self.getRouterById(host.router)
+                if router.distanceFromSource == -1:
+                    router.distanceFromSource = link.weight
+                elif router.distanceFromSource > link.weight:
+                    router.distanceFromSource = link.weight
+                
+                nodesToVisit.append(router)   
+                
+            else: 
+                #It's a router
+                thisrouter = node
+                for i in range(len(thisrouter.allports)):
+                    link = self.getLinkById( thisrouter.links[i] )
+                    nodeid = thisrouter.allports[i]
+                    
+                    if link.weight == -1: 
+                    #The weight for this link hasn't been calculed
+                        link.weight = thisrouter.distanceFromSource + 1
+                    elif link.weight > thisrouter.distanceFromSource + 1:
+                        link.weight = thisrouter.distanceFromSource + 1
+                    
+                    _node = None
+                    if self.isHost(nodeid):
+                        _node = self.getHostById(nodeid)
+                    else:
+                        _node = self.getRouterById(nodeid)
+                        
+                    if _node.distanceFromSource == -1:
+                        _node.distanceFromSource = link.weight
+                    elif _node.distanceFromSource > link.weight:
+                        _node.distanceFromSource = link.weight
+                
+                    nodesToVisit.append(_node)
