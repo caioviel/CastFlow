@@ -71,6 +71,7 @@ class BriteParser:
         nextLinkId = len(self.links) + 1
         for router in self.routers:
             host = HostFactory().createHost(nextHostId, router.id)
+            host.addressedById()
             self.hosts.append(host)
             link = LinkFactory().createLink(nextLinkId, router.id, host.id)
             self.links.append(link)

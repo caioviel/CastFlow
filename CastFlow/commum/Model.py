@@ -136,6 +136,11 @@ class Host:
     def toJson(self):
         return json.dumps(self.internal_toJson())
     
+    def addressedById(self):
+        self.ip = '10.0.0.' + str(self.id)
+        hex_id = hex(self.id)
+        self.mac = '00:00:00:00:00:' + hex_id[2:]
+    
     def __str__(self):
         return self.toJson();
     
