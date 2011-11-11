@@ -198,6 +198,9 @@ class Topology:
         
     def getRouterById(self, routerid):
         return self.routers[routerid - 1]
+    
+    def getLinkById(self, linkid):
+        return self.links[linkid - 1]
         
 class TopologyFactory:
     def internal_decodeJson(self, objs):
