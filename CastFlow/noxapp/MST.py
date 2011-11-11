@@ -47,7 +47,7 @@ class MST:
     
         # parseLinks
         for l in self.topology.links:
-            link = str(l.node1), str(l.node2), 1
+            link = str(l.node1), str(l.node2), l.weight
             edges.append(link)
     
         return nodes, edges

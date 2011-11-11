@@ -1,7 +1,7 @@
 '''
 Created on Oct 26, 2011
 
-@author: tiagopomponet
+@author: tiagopomponet    
 '''
 from commum.Model import Request, GroupFactory
 from commum.util import *
@@ -89,3 +89,8 @@ class Paths:
             for i in range(len(p)-1):
                 s.add((p[i],p[i+1]))
         return s
+''' uso
+x = Paths()
+print x.prepareInstall(x.getPaths())
+
+'''
