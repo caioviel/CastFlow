@@ -87,17 +87,33 @@ class Paths:
         s = []
         for p in paths:
             for i in range(len(p)-1):
-                pair = (p[i],p[i+1])
+                pair = [p[i],p[i+1]]
                 if pair not in s:
                     s.append(pair)
                     
         s.sort()
-        return s
+        print s
+        
+        all_installs = []
+        while len(s) > 0:
+            install = s.pop(0)
+            if len(s) > 0:
+                while install[0] == s[0][0]:
+                    temp = s.pop(0)
+                    install.append(temp[1])
+                
+            all_installs.append(install)
+            
+        return all_installs
     
     def getTopology(self):
         return self.topology
-
+        
 
 x = Paths()
-print x.prepareInstall(x.getPaths())
+paths =  x.prepareInstall(x.getPaths())
+
+print paths
+
+print paths[0][0]
 
