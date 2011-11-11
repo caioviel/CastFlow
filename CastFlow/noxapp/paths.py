@@ -7,8 +7,32 @@ from commum.Model import Request, GroupFactory
 from commum.util import *
 from noxapp.MST import MST
 
-class Paths:
+import json
 
+class InstallPath:
+    def __init__(self):
+        self.routerId = -1
+        self.inputPort = -1
+        self.outputPorts = []
+        self.needRewrite = False
+        self.dst_mac = ''
+        self.dst_ip = ''
+        
+    def addOutputPort(self, portnumber):
+        self.outputPorts.append(portnumber)
+        
+    def toJson(self):      
+        return json.dumps({'InstallPath' : {'routerId' : self.routerId,
+                                 'inputPort' : self.inputPort,
+                                 'outputPorts' : self.outputPorts,
+                                 'rewrite' : str(self.needRewrite),
+                                 'dst_mac' : self.dst_mac,
+                                 'dst_ip' : self.dst_ip}})
+        
+    def __str__(self):
+        return self.toJson()
+
+class Paths:
     def __init__(self):
         self.t = MST()
         self.topology = self.t.getRemoteMST()
@@ -73,8 +97,8 @@ class Paths:
     def dupPaths(self):
         tmp = []
         tmp.extend(self.topology)
-        for tuple in self.topology:
-            node1,node2,peso = tuple
+        for mytuple in self.topology:
+            node1,node2,peso = mytuple
             t = node2, node1, peso
             tmp.append(t)
         return tmp
@@ -108,12 +132,61 @@ class Paths:
     
     def getTopology(self):
         return self.topology
+    
+    
+    def getInstalantions(self):
+        paths = self.getPaths()
+        print paths
         
+        s = []
+        for p in paths:
+            for i in range(1, len(p)-1):
+                pair = [p[i], p[i-1], p[i+1]]
+                if pair not in s:
+                    s.append(pair)
+                    
+        s.sort()
+        print s
+        
+        cTopology = self.t.topology;
+        
+        all_installs = []
+        while len(s) > 0:
+            hope = s.pop(0)
+            installPath = InstallPath()
+            installPath.routerId = hope[0]
+            router = cTopology.getRouterById(installPath.routerId)
+            installPath.inputPort = router.getPortByNode(hope[1])
+            
+            nodeid = hope[2]
+            if cTopology.isHost(nodeid):
+                host = cTopology.getHostById(nodeid)
+                installPath.needRewrite = True
+                installPath.dst_ip = host.ip
+                installPath.dst_mac = host.mac
+            
+            installPath.addOutputPort( router.getPortByNode(nodeid) )
+            
+            while len(s) > 0 and installPath.routerId == s[0][0]:
+                temp = s.pop(0)
+                    
+                nodeid = temp[2]
+                if cTopology.isHost(nodeid):
+                    host = cTopology.getHostById(nodeid)
+                    installPath.needRewrite = True
+                    installPath.dst_ip = host.ip
+                    installPath.dst_mac = host.mac
+            
+                installPath.addOutputPort( router.getPortByNode(nodeid) )
+                
+            all_installs.append(installPath)
+            
+        return all_installs
+            
+p = Paths()
+installs = p.getInstalantions()
 
-x = Paths()
-paths =  x.prepareInstall(x.getPaths())
+for i in installs:
+    print i
 
-print paths
-
-print paths[0][0]
 
