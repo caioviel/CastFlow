@@ -37,6 +37,19 @@ if __name__ == '__main__':
     print 'Sending message: ', jsonMessage
     clientSocket.send(jsonMessage)
     
+        #Sending Topology Request
+    
+    request.id = 1
+    request.action = request.ACTION.GET_TOPOLOGY
+    jsonMessage = request.toJson()
+    print 'Sending message: ', jsonMessage
+    
+    clientSocket.send(jsonMessage)
+    jsonTopology = clientSocket.recv()
+    print 'Message received:', jsonTopology
+    topology = TopologyFactory().decodeJson(jsonTopology)
+    print 'Topology received after update: \n\t', topology.toJson()
+    
     #Sending Complete Group Request
     
     request.id = 4
