@@ -186,7 +186,18 @@ class Topology:
         
     def toJson(self):
         return json.dumps(self.internal_toJson())
+    
+    def isHost(self, nodeid):
+        if nodeid > 50:
+            return True
+        else:
+            return False
         
+    def getHostById(self, hostid):
+        return self.hosts[hostid -51]
+        
+    def getRouterById(self, routerid):
+        return self.routers[routerid - 1]
         
 class TopologyFactory:
     def internal_decodeJson(self, objs):
