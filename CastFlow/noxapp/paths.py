@@ -3,32 +3,7 @@ Created on Oct 26, 2011
 
 @author: tiagopomponet    
 '''
-from commum.Model import Request, GroupFactory
-from commum.util import *
-from noxapp.MST import MST
 
-import json
-
-class InstallPath:
-    def __init__(self):
-        self.routerId = -1
-        self.inputPort = -1
-        self.outputPorts = []
-        self.needRewrite = False
-        self.dst_mac = ''
-        self.dst_ip = ''
-        
-    def addOutputPort(self, portnumber):
-        self.outputPorts.append(portnumber)
-        
-    def toJson(self):      
-        return json.dumps({'InstallPath' : {'routerId' : self.routerId,
-                                 'inputPort' : self.inputPort,
-                                 'outputPorts' : self.outputPorts,
-                                 'rewrite' : str(self.needRewrite),
-                                 'dst_mac' : self.dst_mac,
-                                 'dst_ip' : self.dst_ip}})
-        
     def __str__(self):
         return self.toJson()
 
@@ -183,11 +158,11 @@ class Paths:
             
         return all_installs
             
-p = Paths()
+''''p = Paths()
 installs = p.getInstalantions()
 
 for i in installs:
-    print i
+    print i'''
 
 
 

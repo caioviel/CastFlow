@@ -9,8 +9,13 @@ def printGroup(group):
     print '\tTotal Hosts:', len(group.hosts)
     print '\tMulticast Source:', group.source
     print '\tHosts:',
+    hostsId = []
     for host in group.hosts:
-        print host.id,
+        hostsId.append(host.id)
+        
+    hostsId.sort()    
+    for host in hostsId:
+        print host,
     print '\n'
 
 def initsocket():

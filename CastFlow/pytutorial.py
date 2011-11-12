@@ -10,7 +10,7 @@ from nox.lib.packet.packet_utils import mac_to_str, mac_to_int
 
 from commum.Model import *
 from commum.util import *
-from noxapp.paths import *
+from noxapp_exp.InstallationManager import *
 
 log = logging.getLogger('nox.coreapps.tutorial.pytutorial')
 
@@ -18,11 +18,12 @@ log = logging.getLogger('nox.coreapps.tutorial.pytutorial')
 class pytutorial(Component):
 
     def install_routes(self):
-        print '\n\n\n\n\n\n\n\n\n\n\n\n\n'
-        installs = self.paths.getInstalantions()
+        print '\n\n\n\n\n'
+        print '************ INSTALLING ROUTES ***************'
+        installs = self.im.installs_to_do
 
         for install in installs:
-            print 'Installing: ', install
+            print '\tInstalling: ', install
             attrs = {}
             attrs[core.IN_PORT] = install.inputPort
             actions = []
@@ -46,8 +47,7 @@ class pytutorial(Component):
         # for packet MAC destination fields.
         # This table is initialized to empty when your module starts up.
         # self.mac_to_port = {} # key: MAC addr; value: port
-        self.instalar = True
-        self.paths = Paths()
+        self.im = InstallationManager()
 
     def learn_and_forward(self, dpid, inport, packet, buf, bufid):
         """Learn MAC src port mapping, then flood or send unicast."""
@@ -61,9 +61,9 @@ class pytutorial(Component):
             print 'Packet-in no router', dpid, '--Fonte:', mac_to_str(packet.src), '--Destino:', mac_to_str(packet.dst)
             print 'In-Port:', inport
 
-        if self.instalar == True:
-            self.instalar = False
-            self.install_routes()  
+        if im.has_installation:
+            im.has_installation = False
+            self.install_routes()
 
         return CONTINUE
 
