@@ -31,6 +31,10 @@ class TopologyManager(threading.Thread):
         self.eventListener = None
         self.is_running = False
         self.event_id = 0
+        self.poissonEntry = 2
+        self.poissonExit = 1
+        self.sleepMediam = 40
+        self.sleepStdDev = 20
         
     def getNextEventId(self):
         self.event_id += 1 
@@ -42,22 +46,29 @@ class TopologyManager(threading.Thread):
         self.all_hosts = parser.hosts
         self.links = parser.links
         self.routers = parser.routers
+        print 'Parser Done: routers', len(self.routers), ' | hosts', len(self.all_hosts), ' | links', len(self.links)
         
-        self.__selectMulticastGroup__()
+        hosts_numbers = len(self.all_hosts)
+        self.__selectMulticastGroup__(hosts_numbers/3, hosts_numbers-1)
+        print 'Multicast Group Selected:', len(self.multicast_group), 'hosts'
         
         self.multicast_source = self.selectRandomHost(self.multicast_group)
+        print 'Multicast Source: ', self.multicast_source
         
         self.__selectActiveHosts__()
+        print 'Active Hosts Selected:', len(self.active_hosts), 'hosts'
         
         self.__calcLinksWeight__()
+        print 'Links Weight Calculated'
         
         
     def selectRandomHost(self, hosts):
         host_index = int(numpy.random.uniform(0.0, len(hosts)-1))
         return hosts[host_index]
     
-    def __selectMulticastGroup__(self, min_number=20.0, max_number=40.0):
-        multicast_hosts_number = int(numpy.random.uniform(min_number, max_number))
+    def __selectMulticastGroup__(self, min_number, max_number):
+        #multicast_hosts_number = int(numpy.random.uniform(min_number, max_number))
+        multicast_hosts_number = len(self.all_hosts)/2 +1
     
         self.multicast_group = []
         while len(self.multicast_group) < multicast_hosts_number:
@@ -66,7 +77,9 @@ class TopologyManager(threading.Thread):
                 self.multicast_group.append(host)
     
     def __selectActiveHosts__(self):
-        active_hosts_number = int(numpy.random.normal(len(self.multicast_group)/2, 3.0))
+        active_hosts_number = len(self.multicast_group)
+        while active_hosts_number >= len(self.multicast_group) -1 or active_hosts_number == 0:
+            active_hosts_number = int(numpy.random.normal(len(self.multicast_group)/2, 1.0))
         
         self.active_hosts = []
         while len(self.active_hosts) < active_hosts_number:
@@ -96,7 +109,7 @@ class TopologyManager(threading.Thread):
         print 'Starting to generate events...'
         while self.is_running:
             #Dormir um tempo aleatorio seguindo uma distrubuicao normal de media 40 e variancia 15 (em segundos)
-            sleepingTime = numpy.random.normal(40, 20)
+            sleepingTime = numpy.random.normal(self.sleepMediam, self.sleepStdDev)
             time.sleep(sleepingTime)
             
             #50% de chances de ser um evento de entrada / 50% de ser um evento de saida
@@ -113,7 +126,7 @@ class TopologyManager(threading.Thread):
             
     def generateEntryEvent(self):
         entering_hosts = []
-        entering_hosts_number = numpy.random.poisson(2);
+        entering_hosts_number = numpy.random.poisson(self.poissonEntry);
         while len(entering_hosts) < entering_hosts_number:
             host = self.selectRandomHost(self.inactive_hosts)
             if host not in entering_hosts:
@@ -128,7 +141,7 @@ class TopologyManager(threading.Thread):
     
     def generateExitEvent(self):
         exiting_hosts = []
-        exiting_hosts_number = numpy.random.poisson(1);
+        exiting_hosts_number = numpy.random.poisson(self.poissonExit);
         while len(exiting_hosts) < exiting_hosts_number:
             host = self.selectRandomHost(self.active_hosts)
             if host not in exiting_hosts:
@@ -142,14 +155,14 @@ class TopologyManager(threading.Thread):
         return event
     
     def isHost(self, nodeid):
-        if nodeid > 50:
+        if nodeid > len(self.routers):
             return True
         else:
             return False
         
     def getHostById(self, hostId):
         if self.isHost(hostId):
-            return self.all_hosts[hostId-51]
+            return self.all_hosts[hostId- (len(self.routers)+1) ]
         else:
             return None
         

@@ -139,7 +139,10 @@ class Host:
     def addressedById(self):
         self.ip = '10.0.0.' + str(self.id)
         hex_id = hex(self.id)
-        self.mac = '00:00:00:00:00:' + hex_id[2:]
+        hex_id = hex_id[2:]
+        if len(hex_id) == 1:
+            hex_id = '0' + hex_id
+        self.mac = '00:00:00:00:00:' + hex_id
     
     def __str__(self):
         return self.toJson();
@@ -193,13 +196,13 @@ class Topology:
         return json.dumps(self.internal_toJson())
     
     def isHost(self, nodeid):
-        if nodeid > 50:
+        if nodeid > len(self.routers):
             return True
         else:
             return False
         
     def getHostById(self, hostid):
-        return self.hosts[hostid -51]
+        return self.hosts[hostid - (len(self.routers) + 1)]
         
     def getRouterById(self, routerid):
         return self.routers[routerid - 1]

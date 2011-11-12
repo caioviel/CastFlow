@@ -474,7 +474,6 @@ class MyTopo( Topo ):
         
         clientSocket.send(jsonMessage)
         jsonTopology = clientSocket.recv()
-        print 'Message received:', jsonTopology
         topology = TopologyFactory().decodeJson(jsonTopology)
         
         for router in topology.routers:

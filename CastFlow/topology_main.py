@@ -13,6 +13,6 @@ if __name__ == '__main__':
     if (len(sys.argv) > 1):
         fileName = sys.argv[1]
         
-    server = TopologyServer('brite1.brite')
+    server = TopologyServer('britefiles/brite_05_nodes.brite')
     server.startListen()
     
