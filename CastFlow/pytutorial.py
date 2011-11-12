@@ -27,15 +27,14 @@ class pytutorial(Component):
             attrs = {}
             attrs[core.IN_PORT] = install.inputPort
             actions = []
-            for port in install.outputPorts:
-                actions.append( [openflow.OFPAT_OUTPUT, [0, port] ] )
-
             if install.needRewrite == True :
                 actions.append( [openflow.OFPAT_SET_DL_SRC, "ca:fe:ca:fe:ca:fe"] )
                 actions.append( [openflow.OFPAT_SET_NW_SRC, "10.0.2.254"] )
                 actions.append ([openflow.OFPAT_SET_DL_DST, str(install.dst_mac) ] )
                 actions.append ([openflow.OFPAT_SET_NW_DST, str(install.dst_ip) ] )
 
+            for port in install.outputPorts:
+                actions.append( [openflow.OFPAT_OUTPUT, [0, port] ] )
 
             self.install_datapath_flow(install.routerId, attrs, 3600, 3600, actions, None, openflow.OFP_DEFAULT_PRIORITY, install.inputPort, None)
 
@@ -60,12 +59,10 @@ class pytutorial(Component):
         else:
             print 'Packet-in no router', dpid, '--Fonte:', mac_to_str(packet.src), '--Destino:', mac_to_str(packet.dst)
             print 'In-Port:', inport
-            
+
         if self.im == None:
             self.im = InstallationManager()
-
-        if self.im.has_installation:
-            self.im.has_installation = False
+            self.im.update_installs_function = self.install_routes()
             self.install_routes()
 
         return CONTINUE
