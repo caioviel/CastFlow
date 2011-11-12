@@ -47,7 +47,7 @@ class pytutorial(Component):
         # for packet MAC destination fields.
         # This table is initialized to empty when your module starts up.
         # self.mac_to_port = {} # key: MAC addr; value: port
-        self.im = InstallationManager()
+        self.im = None
 
     def learn_and_forward(self, dpid, inport, packet, buf, bufid):
         """Learn MAC src port mapping, then flood or send unicast."""
@@ -60,9 +60,12 @@ class pytutorial(Component):
         else:
             print 'Packet-in no router', dpid, '--Fonte:', mac_to_str(packet.src), '--Destino:', mac_to_str(packet.dst)
             print 'In-Port:', inport
+            
+        if self.im == None:
+            self.im = InstallationManager()
 
-        if im.has_installation:
-            im.has_installation = False
+        if self.im.has_installation:
+            self.im.has_installation = False
             self.install_routes()
 
         return CONTINUE
