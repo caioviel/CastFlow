@@ -194,7 +194,7 @@ class InstallationManager(threading.Thread):
         for path in paths:
             for i in range(1, len(path)-1):
                 # (NODEID, PREVIOUS_NODE, NEXT_NODE)
-                hop = (path[i], path[i-1], path[i+1])
+                hop = [path[i], path[i-1], path[i+1]]
                 if hop not in hops:
                     hops.append(hop)
                     
@@ -210,10 +210,13 @@ class InstallationManager(threading.Thread):
         all_installs = []
         while len(hops) > 0:
             hop = hops.pop(0)
+            print 'hop: node', hop[0], '| nextNode', hop[2], '| previousNode', hop[1]
             installPath = InstallPath()
             installPath.routerId = hop[0]
             router = topo.getRouterById(installPath.routerId)
+            print router
             installPath.inputPort = router.getPortByNode(hop[1])
+            print installPath.inputPort
             
             nodeid = hop[2]
             if topo.isHost(nodeid):

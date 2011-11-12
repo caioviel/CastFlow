@@ -22,7 +22,7 @@ MULTICAST_IP = "10.0.2.254"
 MULTICAST_MAC = "ca:fe:ca:fe:ca:fe"
 
 #Register the multicast ip and mac on the arp table.
-os.system('arp -s' + MULTICAST_IP + ' ' + MULTICAST_MAC)
+os.system('arp -s ' + MULTICAST_IP + ' ' + MULTICAST_MAC)
 
 #Arguments should be 2 or more
 if len( sys.argv ) < 2:
@@ -70,7 +70,7 @@ elif sys.argv[1] == "-c":
         print "sended on   ", data
         
 elif sys.argv[1] == "-m":
-    print "UDP multiast IP:". MULTICAST_IP
+    print "UDP multiast IP:", MULTICAST_IP
     print "UDP multicast port:", UDP_PORT
     print "Sending interval:", NSECONDS, " seconds"
     
