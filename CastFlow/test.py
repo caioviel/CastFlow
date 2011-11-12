@@ -26,6 +26,9 @@ if __name__ == '__main__':
               
         print '\n\n\n', group.toJson()
         
+        request = Request(1, Request.ACTION.ENTRY_GROUP)
+        request.hosts = [2]
+        
         
         
         

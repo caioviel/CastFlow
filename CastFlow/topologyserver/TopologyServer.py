@@ -55,15 +55,14 @@ class TopologyServer(InternalInterface):
         return group
     
     def addEventListeners(self, handler):
-        if not self.topologyManager.is_running:
-            self.topologyManager.startEvents()
+        '''if not self.topologyManager.is_running:
+            self.topologyManager.startEvents()'''
         
         if handler not in self.eventListeners:
             self.eventListeners.append(handler)
             print 'Client', handler.address, 'is listening for events.'
         else:
             print 'Client', handler.address, 'has been already listening for events.'
-            
     
     def addStartListeners(self, handler):
         if handler not in self.startListeners:
@@ -74,6 +73,16 @@ class TopologyServer(InternalInterface):
             
     def updateTopology(self, request):
         self.topologyManager.updateHosts(request.topology.hosts)
+        
+    def entryEvent(self, request):
+        event = self.topologyManager.forceEntryEvent(request.hosts)
+        if event != None:
+            self.notifyEvent(event)
+    
+    def exitEvent(self, request):
+        event = self.topologyManager.forceExitEvent(request.hosts)
+        if event != None:
+            self.notifyEvent(event)
     
     def removeHandler(self, handler):
         if handler in self.startListeners:

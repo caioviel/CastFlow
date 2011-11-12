@@ -317,21 +317,24 @@ class EventFactory:
     
 class Request:
     ACTION = enum('GET_TOPOLOGY', 'GET_COMPLETE_GROUP', 
-                  'GET_GROUP', 'REGISTER_FOR_EVENTS', 'WAIT_START', 'START', 'NONE', 'UPDATE_TOPOLOGY')
+                  'GET_GROUP', 'REGISTER_FOR_EVENTS', 'WAIT_START', 'START', 'NONE', 'UPDATE_TOPOLOGY', 'ENTRY_GROUP', 'EXIT_GROUP')
     
     def __init__(self, myid = -1, action = ACTION.NONE):
         self.id = myid
         self.action = action
         self.topology = None
+        self.hosts = []
         
     def internal_toJson(self):
-        if self.action != self.ACTION.UPDATE_TOPOLOGY:
-            print 'Not a request(updateTopology)'
-            return {'request' : {'id' : self.id, 'action' : self.ACTION_to_string(self.action)} }
-        else:
-            print 'A request(updateTopology)'
+        if self.action == self.ACTION.UPDATE_TOPOLOGY:
             return {'request' : {'id' : self.id, 'action' : self.ACTION_to_string(self.action), 
                                  'topology' : self.topology.internal_toJson() } }
+        elif self.action == self.ACTION.ENTRY_GROUP or self.action == self.ACTION.EXIT_GROUP:
+            return {'request' : {'id' : self.id, 'action' : self.ACTION_to_string(self.action), 
+                                 'hosts' : self.hosts } }
+        else:
+            return {'request' : {'id' : self.id, 'action' : self.ACTION_to_string(self.action)} }
+
     
         
     def ACTION_to_string(self, action):
@@ -349,6 +352,10 @@ class Request:
             return 'start'
         elif action == self.ACTION.UPDATE_TOPOLOGY:
             return 'updateTopology'
+        elif action == self.ACTION.EXIT_GROUP:
+            return 'exitGroup'
+        elif action == self.ACTION.ENTRY_GROUP:
+            return 'entryGroup'
         else:
             return 'none'
     
@@ -367,6 +374,10 @@ class Request:
             return self.ACTION.START
         elif actionStr == 'updateTopology':
             return self.ACTION.UPDATE_TOPOLOGY
+        elif actionStr == 'exitGroup':
+            return self.ACTION.EXIT_GROUP
+        elif actionStr == 'entryGroup':
+            return self.ACTION.ENTRY_GROUP
         else:
             return self.ACTION.NONE
         
@@ -379,8 +390,9 @@ class RequestFactory:
         request.id = objs['request']['id']
         request.action = request.string_to_ACTION( objs['request']['action'] )
         if request.action == request.ACTION.UPDATE_TOPOLOGY:
-                print objs['request']['topology']
-                request.topology = TopologyFactory().internal_decodeJson(objs['request']['topology'])
+            request.topology = TopologyFactory().internal_decodeJson(objs['request']['topology'])
+        elif request.action == request.ACTION.ENTRY_GROUP or request.action == request.ACTION.EXIT_GROUP:
+            request.hosts = objs['request']['hosts']
         return request
     
     def decodeJson(self, jsonStr):

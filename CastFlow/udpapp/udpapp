@@ -11,14 +11,21 @@
 import sys
 import socket
 #import datetime
+import os
 from time import time, sleep
 
 UDP_PORT=8885 #Port Listening/Sending
 
 NSECONDS=0.030 #Send Period
 
+MULTICAST_IP = "10.0.2.254"
+MULTICAST_MAC = "ca:fe:ca:fe:ca:fe"
+
+#Register the multicast ip and mac on the arp table.
+os.system('arp -s' + MULTICAST_IP + ' ' + MULTICAST_MAC)
+
 #Arguments should be 2 or more
-if len( sys.argv ) < 3:
+if len( sys.argv ) < 2:
     print " "
     print "Usage ="
     print "      Server:"
@@ -33,7 +40,7 @@ elif sys.argv[1] == "-s":
 
     print "UDP target IP:", UDP_CLIENTS
     print "UDP target port:", UDP_PORT
-    print "Sending period:", NSECONDS, " seconds"
+    print "Sending interval:", NSECONDS, " seconds"
 
     sock = socket.socket( socket.AF_INET,        # Internet
                           socket.SOCK_DGRAM )    # UDP
@@ -48,7 +55,10 @@ elif sys.argv[1] == "-s":
 
 #Client
 elif sys.argv[1] == "-c":
-    UDP_IP=sys.argv[2]     #Third argument it's the binding IP
+    if len(sys.argv) > 3:
+        UDP_IP=sys.argv[2]     #Third argument it's the binding IP
+    else:
+        UDP_IP = ""
     
     sock = socket.socket( socket.AF_INET,     # Internet
                           socket.SOCK_DGRAM )     # UDP
@@ -58,6 +68,20 @@ elif sys.argv[1] == "-c":
         data, addr = sock.recvfrom( 1024 )   # buffer size is 1024 bytes
         print "received on ", repr( time() ),  "     \\/" ##datetime.datetime.now()
         print "sended on   ", data
+        
+elif sys.argv[1] == "-m":
+    print "UDP multiast IP:". MULTICAST_IP
+    print "UDP multicast port:", UDP_PORT
+    print "Sending interval:", NSECONDS, " seconds"
+    
+    sock = socket.socket( socket.AF_INET,        # Internet
+                          socket.SOCK_DGRAM )    # UDP
+    
+    while True:
+        sock.sendto( repr( time() ) + "     /\\", #str( datetime.datetime.now() ),
+                    (MULTICAST_IP, UDP_PORT) )
+            
+        sleep( NSECONDS )
 
 #Ops...
 else:

@@ -49,8 +49,16 @@ class ClientHandler(threading.Thread):
                     self.request_start(request)
                     
                 elif request.action == request.ACTION.UPDATE_TOPOLOGY:
-                    print '\Message request(updateTopology) received from client', self.address
+                    print '\tMessage request(updateTopology) received from client', self.address
                     self.request_update_topology(request)
+                
+                elif request.action == request.ACTION.ENTRY_GROUP:
+                    print '\tMessage request(entryGroup) received from client', self.address
+                    self.request_entry_group(request)
+                    
+                elif request.action == request.ACTION.EXIT_GROUP:
+                    print '\tMessage request(entryGroup) received from client', self.address
+                    self.request_exit_group(request)
                 
                 else:
                     return 'none'
@@ -85,6 +93,14 @@ class ClientHandler(threading.Thread):
         
     def request_update_topology(self, request):
         self.topologyServer.updateTopology(request)
+        
+    def request_entry_group(self, request):
+        self.topologyServer.addEventListeners(self)
+        self.topologyServer.entryEvent(request)
+    
+    def request_exit_group(self, request):
+        self.topologyServer.addEventListeners(self)
+        self.topologyServer.exitEvent(request)
         
     def notify_client(self, notification):
         jsonMessage = notification.toJson()

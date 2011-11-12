@@ -134,6 +134,7 @@ class TopologyManager(threading.Thread):
                 
         for host in entering_hosts:
             self.active_hosts.append(host)
+            self.inactive_hosts.remove(host)
                 
         event = Event(self.getNextEventId(), 'entry')
         event.hosts = entering_hosts
@@ -149,10 +150,52 @@ class TopologyManager(threading.Thread):
                 
         for host in exiting_hosts:
             self.inactive_hosts.append(host)
+            self.active_hosts.remove(host)
                 
         event = Event(self.getNextEventId(), 'exit')
         event.hosts = exiting_hosts
         return event
+    
+    def forceEntryEvent(self, hosts):
+        if hosts == []:
+            return self.generateEntryEvent()
+        else:
+            hosts_to_entry = []
+            for host in hosts:
+                print 'ForceEntryEvent:', host
+                host_to_entry = self.getHostById(host)
+                if host_to_entry in self.active_hosts:
+                    print 'Host', host, 'is already in the multicast group'
+                    return None
+                hosts_to_entry.append(host_to_entry)
+                
+            for host in hosts_to_entry:
+                self.active_hosts.append(host)
+                self.inactive_hosts.remove(host)
+                
+            event = Event(self.getNextEventId(), 'entry')
+            event.hosts = hosts_to_entry
+            return event
+        
+    def forceExitEvent(self, hosts):
+        if hosts == []:
+            return self.generateExitEvent()
+        else:
+            hosts_to_exit = []
+            for host in hosts:
+                host_to_exit = self.getHostById(host)
+                if host_to_exit in self.inactive_hosts:
+                    print "Host", host,  "isn't in the multicast group"
+                    return None
+                hosts_to_exit.append(host_to_exit)
+                
+            for host in hosts_to_exit:
+                self.inactive_hosts.append(host)
+                self.active_hosts.remove(host)
+                
+            event = Event(self.getNextEventId(), 'exit')
+            event.hosts = hosts_to_exit
+            return event
     
     def isHost(self, nodeid):
         if nodeid > len(self.routers):
@@ -162,7 +205,7 @@ class TopologyManager(threading.Thread):
         
     def getHostById(self, hostId):
         if self.isHost(hostId):
-            return self.all_hosts[hostId- (len(self.routers)+1) ]
+            return self.all_hosts[hostId - (len(self.routers)+1) ]
         else:
             return None
         
