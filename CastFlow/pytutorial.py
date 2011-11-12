@@ -32,8 +32,8 @@ class pytutorial(Component):
             if install.needRewrite == True :
                 actions.append( [openflow.OFPAT_SET_DL_SRC, "ca:fe:ca:fe:ca:fe"] )
                 actions.append( [openflow.OFPAT_SET_NW_SRC, "10.0.2.254"] )
-                actions.append ([openflow.OFPAT_SET_DL_DST, install.mac] )
-                actions.append ([openflow.OFPAT_SET_NW_DST, install.ip] )
+                actions.append ([openflow.OFPAT_SET_DL_DST, install.dst_mac] )
+                actions.append ([openflow.OFPAT_SET_NW_DST, install.dst_ip] )
 
 
             self.install_datapath_flow(install.routerId, attrs, 3600, 3600, actions, None, openflow.OFP_DEFAULT_PRIORITY, install.inputPort, None)
