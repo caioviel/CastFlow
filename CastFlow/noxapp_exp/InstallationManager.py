@@ -82,7 +82,7 @@ class InstallationManager(threading.Thread):
         
         #Start listening to events
         self.start()
-        self.update_installs_function = None
+        self.nox = None
         
     def __connect__(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -281,7 +281,8 @@ class InstallationManager(threading.Thread):
                 print '\t', install
                 
             self.has_installation = True
-            self.update_installs_function()
+            if self.nox != None:
+                self.nox.install_routes()
             
     def entry_event(self, event):
         new_paths = []

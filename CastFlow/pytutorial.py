@@ -62,7 +62,7 @@ class pytutorial(Component):
 
         if self.im == None:
             self.im = InstallationManager()
-            self.im.update_installs_function = self.install_routes()
+            self.im.nox = self
             self.install_routes()
 
         return CONTINUE
