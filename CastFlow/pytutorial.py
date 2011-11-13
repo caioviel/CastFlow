@@ -19,7 +19,17 @@ class pytutorial(Component):
 
     def install_routes(self):
         print '\n\n\n\n\n'
-        print '************ INSTALLING ROUTES ***************'
+        print '********** REMOVING OBSOLUTE ROUTES ***********'
+        removes = self.im.installs_to_remove
+        for install in removes:
+            print 'Removing: ', install
+            attrs = {}
+            attrs[core.IN_PORT] = install.inputPort
+            
+            self.delete_datapath_flow(install.routerId, attrs)
+            
+        
+        print '************ INSTALLING ROUTES ****************'
         installs = self.im.installs_to_do
 
         for install in installs:
