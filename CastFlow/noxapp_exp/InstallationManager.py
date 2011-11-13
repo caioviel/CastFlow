@@ -7,8 +7,10 @@ Created on Nov 12, 2011
 from commum.Model import *
 from commum.util import *
 from noxapp_exp.MSTParser import MSTParser
+from commum.DataCollector import NoxAppCollector
 
 import threading
+import time
 
 class InstallPath:
     def __init__(self):
@@ -60,11 +62,15 @@ class InstallationManager(threading.Thread):
         
         #Copy the array because it will be changed during the calc path's process
         temp_hosts = complete_group.hosts[0:]
-            
+        
+        self.dc = NoxAppCollector()
+        self.dc.write_header()
+        self.dc.collect_begin_mst(len(self.topology.hosts), time())
         for host in complete_group.hosts:
             mst = MSTParser(self.topology, host).get_mst( algorithm = 'prim' )
             mst = self.__duplicate_paths__(mst)
             self.paths_by_source[host.id] = self.__calc_paths_by_source__(mst, host, temp_hosts)
+        self.dc.collect_end_mst(len(self.topology.hosts), time())
         
         #Get the actual Multicast Group from the Topology Server
         self.__get_group__()
@@ -82,6 +88,8 @@ class InstallationManager(threading.Thread):
         #Set the begin configurations status
         self.installs_to_remove = []
         self.installs_to_do = self.current_installs
+        
+        self.dc.collect_event_effects(None, len(self.installs_to_do), len(self.installs_to_remove), time())
         
         self.has_installation = True
         
@@ -253,6 +261,12 @@ class InstallationManager(threading.Thread):
             
         return all_installs
     
+    def collect_begin_installs(self):
+        self.dc.collect_begin_installing_flows(len(self.topology.hosts), len(self.active_hosts), time())
+        
+    def collect_end_installs(self):
+        self.dc.collect_end_installing_flows(len(self.topology.hosts), len(self.active_hosts), time())
+    
     def run(self):
         #Send a Request Start to the server
         request = Request()
@@ -284,8 +298,9 @@ class InstallationManager(threading.Thread):
                 print 'Invalid event received.'
                 continue
             
-            self.has_installation = True
             if self.nox != None:
+                self.dc.collect_event_effects(event, len(self.installs_to_do), len(self.installs_to_remove), time())
+                
                 self.nox.install_routes()
             else:
                 print '\n\nInstalls to do:'
