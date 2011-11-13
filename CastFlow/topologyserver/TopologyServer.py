@@ -83,6 +83,11 @@ class TopologyServer(InternalInterface):
         event = self.topologyManager.forceExitEvent(request.hosts)
         if event != None:
             self.notifyEvent(event)
+            
+    def changeSource(self, request):
+        event = self.topologyManager.forceChangeSource(request.source)
+        if event != None:
+            self.notifyEvent(event)
     
     def removeHandler(self, handler):
         if handler in self.startListeners:

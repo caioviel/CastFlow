@@ -59,6 +59,10 @@ class ClientHandler(threading.Thread):
                 elif request.action == request.ACTION.EXIT_GROUP:
                     print '\tMessage request(entryGroup) received from client', self.address
                     self.request_exit_group(request)
+                    
+                elif request.action == request.ACTION.CHANGE_SOURCE:
+                    print '\tMessage request(changeSource) received from client', self.address
+                    self.request_change_source(request)
                 
                 else:
                     return 'none'
@@ -101,6 +105,10 @@ class ClientHandler(threading.Thread):
     def request_exit_group(self, request):
         self.topologyServer.addEventListeners(self)
         self.topologyServer.exitEvent(request)
+        
+    def request_change_source(self, request):
+        self.topologyServer.addEventListeners(self)
+        self.topologyServer.changeSource(request)
         
     def notify_client(self, notification):
         jsonMessage = notification.toJson()

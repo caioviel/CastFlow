@@ -282,6 +282,7 @@ class Event:
         self.id = myid
         self.type = mytype
         self.hosts = []
+        self.source = -1
         pass
 
     def internal_toJson(self):
@@ -289,10 +290,15 @@ class Event:
         for h in self.hosts:
             hts.append(h.internal_toJson())
             
-        return {'event' :
+        if self.type == 'changeSource':
+            return {'event' :
+                            {'id' : self.id, 'type' : self.type,
+                             'source' : self.source} }
+        else:
+            return {'event' :
                             {'id' : self.id, 'type' : self.type,
                              'hosts' : hts} }
-        
+    
     def toJson(self):
         return json.dumps(self.internal_toJson())
     
@@ -300,15 +306,17 @@ class EventFactory:
     def internal_decodeJson(self, objs):
         hosts = []
 
-        factory = HostFactory()
-        array_list = objs['event']['hosts']
-        for item in array_list:
-            hosts.append(factory.internal_decodeJson(item))
-
         e = Event()
         e.id = objs['event']['id']
         e.type = objs['event']['type']
-        e.hosts = hosts
+        if e.type == 'changeSource':
+            e.source = objs['event']['source']
+        else: 
+            factory = HostFactory()
+            array_list = objs['event']['hosts']
+            for item in array_list:
+                hosts.append(factory.internal_decodeJson(item))
+            e.hosts = hosts
         return e
     
     def decodeJson(self, jsonStr):
@@ -317,13 +325,17 @@ class EventFactory:
     
 class Request:
     ACTION = enum('GET_TOPOLOGY', 'GET_COMPLETE_GROUP', 
-                  'GET_GROUP', 'REGISTER_FOR_EVENTS', 'WAIT_START', 'START', 'NONE', 'UPDATE_TOPOLOGY', 'ENTRY_GROUP', 'EXIT_GROUP')
+                  'GET_GROUP', 'REGISTER_FOR_EVENTS', 
+                  'WAIT_START', 'START', 'NONE', 
+                  'UPDATE_TOPOLOGY', 'ENTRY_GROUP', 
+                  'EXIT_GROUP', 'CHANGE_SOURCE')
     
     def __init__(self, myid = -1, action = ACTION.NONE):
         self.id = myid
         self.action = action
         self.topology = None
         self.hosts = []
+        self.source = -1
         
     def internal_toJson(self):
         if self.action == self.ACTION.UPDATE_TOPOLOGY:
@@ -332,6 +344,9 @@ class Request:
         elif self.action == self.ACTION.ENTRY_GROUP or self.action == self.ACTION.EXIT_GROUP:
             return {'request' : {'id' : self.id, 'action' : self.ACTION_to_string(self.action), 
                                  'hosts' : self.hosts } }
+        elif self.action == self.ACTION.CHANGE_SOURCE:
+            return {'request' : {'id' : self.id, 'action' : self.ACTION_to_string(self.action), 
+                                 'source' : self.source } }
         else:
             return {'request' : {'id' : self.id, 'action' : self.ACTION_to_string(self.action)} }
 
@@ -356,6 +371,8 @@ class Request:
             return 'exitGroup'
         elif action == self.ACTION.ENTRY_GROUP:
             return 'entryGroup'
+        elif action == self.ACTION.CHANGE_SOURCE:
+            return 'changeSource'
         else:
             return 'none'
     
@@ -378,6 +395,8 @@ class Request:
             return self.ACTION.EXIT_GROUP
         elif actionStr == 'entryGroup':
             return self.ACTION.ENTRY_GROUP
+        elif actionStr == 'changeSource':
+            return self.ACTION.CHANGE_SOURCE
         else:
             return self.ACTION.NONE
         
@@ -393,6 +412,8 @@ class RequestFactory:
             request.topology = TopologyFactory().internal_decodeJson(objs['request']['topology'])
         elif request.action == request.ACTION.ENTRY_GROUP or request.action == request.ACTION.EXIT_GROUP:
             request.hosts = objs['request']['hosts']
+        elif request.action == request.ACTION.CHANGE_SOURCE:
+            request.source = objs['request']['source']
         return request
     
     def decodeJson(self, jsonStr):

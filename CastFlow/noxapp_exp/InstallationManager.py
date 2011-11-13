@@ -277,6 +277,9 @@ class InstallationManager(threading.Thread):
             elif event.type == "exit":
                 print 'Exit Event received.'
                 self.exit_event(event)
+            elif event.type == "changeSource":
+                print 'Change Source Event received'
+                self.change_source_event(event)
             else:
                 print 'Invalid event received.'
                 continue
@@ -370,7 +373,48 @@ class InstallationManager(threading.Thread):
         for routerId in self.installs_by_router.keys():
             if routerId not in keep_routers:
                 self.installs_to_remove.append( self.installs_by_router.pop(routerId) )
+                
+    def change_source_event(self, event):
+        new_source_id = event.source
+        if new_source_id in self.active_hosts:
+            self.active_hosts.remove(new_source_id)
+        
+        self.current_source = new_source_id
+        self.path_to_host = self.paths_by_source[self.current_source]   
+        
+        paths = []
+        for host in self.active_hosts:
+            paths.append(self.path_to_host[host])
+            
+        self.hops = self.__calcule_hops__(paths)
+        self.hops.sort()
+        
+        new_installs = self.__generate_installs__()
+        self.installs_to_do = []
+        self.installs_to_remove = []
+        keep_routers = []
+        for install in new_installs:
+            old_install = self.installs_by_router.get(install.routerId)
+            keep_routers.append(install.routerId)
+            if old_install == None:
+                #There wasn't a installation in this router
+                self.installs_by_router[install.routerId] = install
+                self.installs_to_do.append(install)
+            else:
+                #There was a previous installation in this router
+                if (old_install.outputPorts == install.outputPorts 
+                        and old_install.inputPort == install.inputPort):
+                    #The installation is the same, just ignore.
+                    pass
+                else:
+                    #The installation is different!
+                    #self.installs_to_remove.append(old_install) #TODO: Verify if it's realy necessary
+                    self.installs_to_do.append(install)
+                    self.installs_by_router[install.routerId] = install
                     
+        for routerId in self.installs_by_router.keys():
+            if routerId not in keep_routers:
+                self.installs_to_remove.append( self.installs_by_router.pop(routerId) )   
         
         
 if __name__ == '__main__':

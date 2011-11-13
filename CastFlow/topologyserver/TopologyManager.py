@@ -58,8 +58,8 @@ class TopologyManager(threading.Thread):
         self.__selectActiveHosts__()
         print 'Active Hosts Selected:', len(self.active_hosts), 'hosts'
         
-        self.__calcLinksWeight__()
-        print 'Links Weight Calculated'
+        #self.__calcLinksWeight__()
+        #print 'Links Weight Calculated'
         
         
     def selectRandomHost(self, hosts):
@@ -196,6 +196,27 @@ class TopologyManager(threading.Thread):
             event = Event(self.getNextEventId(), 'exit')
             event.hosts = hosts_to_exit
             return event
+        
+    def forceChangeSource(self, new_source_id):
+        print 'forceChangeSource'
+        source_host = self.getHostById(new_source_id)
+        if source_host in self.multicast_group:
+            #The new new_source_id must be in the multicast group
+            if source_host in self.active_hosts:
+                #The new new_source_id won't be a active source_host
+                self.active_hosts.remove(source_host)
+                
+            #The old new_source_id will be a inactive source_host
+            old_source = self.getHostById( self.multicast_source )
+            self.inactive_hosts.append(old_source)
+            self.multicast_source = source_host
+            
+            event = Event(self.getName(), 'changeSource')
+            event.source = new_source_id
+            return event
+        
+        return None
+        
     
     def isHost(self, nodeid):
         if nodeid > len(self.routers):

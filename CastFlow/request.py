@@ -84,6 +84,19 @@ def exitGroup(hosts):
     for host in event.hosts:
         print host.id,
     print '\n'
+    
+def changeSource(source):
+    s = initsocket()
+    request = Request()
+    request.id = 1
+    request.action = request.ACTION.CHANGE_SOURCE
+    request.source = source
+    s.send( request.toJson() )
+    jsonStr = s.recv()
+    event = EventFactory().decodeJson(jsonStr)
+    print 'Change Source Event:'
+    print '\tNew Source:', event.source
+    print '\n'
 
 def registerForEvents():
     s = initsocket()
@@ -97,10 +110,13 @@ def registerForEvents():
         event = EventFactory().decodeJson(jsonStr)
         print 'Event Received:'
         print '\tType:', event.type
-        print '\tHosts:',
-        for host in event.hosts:
-            print host.id,
-            print '\n'
+        if event.type == 'changeSource':
+            print '\nNew Source:', event.source
+        else:
+            print '\tHosts:',
+            for host in event.hosts:
+                print host.id,
+                print '\n'
 
 if len(sys.argv) < 2:
     print 'Please, inform the request type.'
@@ -119,15 +135,26 @@ elif request_type == 'entryGroup':
     if len(sys.argv) >= 3:
         for host in sys.argv[2:]:
             hosts.append(int(host))
-    entryGroup(hosts)
+            
+        entryGroup(hosts)
+    else:
+        print 'Please, say the hosts.'
 elif request_type == 'exitGroup':
     hosts = []
     if len(sys.argv) >= 3:
         for host in sys.argv[2:]:
             hosts.append(int(host))
-    exitGroup(hosts)
+        
+        exitGroup(hosts)
+    else:
+        print 'Please, say the hosts.'
 elif request_type == 'registerForEvents':
     registerForEvents()
+elif request_type == 'changeSource':
+    if len(sys.argv) >= 3:
+        changeSource( int(sys.argv[2]) )
+    else:
+        print 'Please, say the new source'
 else:
     print 'Invalid request type: ', request_type
     
