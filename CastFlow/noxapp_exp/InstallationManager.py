@@ -54,16 +54,21 @@ class InstallationManager(threading.Thread):
         #Get the Topology from Topology Server
         self.__get_topology__()
         
-        #Create the minimum spanning tree from the topology graph
-        self.mst = MSTParser(self.topology).get_mst( algorithm = 'prim' )
-        self.__duplicate_paths__()
+        #Create the minimum spanning tree from the topology graph        
+        complete_group = self.__get_complete_group__()
+        self.paths_by_source = {}
         
-        #Get the Complete Multicast Group from the Topology Server
-        #and calcule all paths from the source.
-        self.__get_complete_group__()
+        #Copy the array because it will be changed during the calc path's process
+        temp_hosts = complete_group.hosts[0:]
+            
+        for host in complete_group.hosts:
+            mst = MSTParser(self.topology, host).get_mst( algorithm = 'prim' )
+            mst = self.__duplicate_paths__(mst)
+            self.paths_by_source[host.id] = self.__calc_paths_by_source__(mst, host, temp_hosts)
         
         #Get the actual Multicast Group from the Topology Server
         self.__get_group__()
+        self.path_to_host = self.paths_by_source[self.current_source]
         
         #Calculate the initial installation hops
         self.__calcultate_initial_hops__()
@@ -111,9 +116,9 @@ class InstallationManager(threading.Thread):
         jsonTopology = self.socket.recv()
         self.topology = TopologyFactory().decodeJson( jsonTopology )
         
-    def __get_path__(self, source, destiny, mpath):
+    def __get_path__(self, source, destiny, mpath, mst):
         mpath.append(source)
-        for t in self.mst:
+        for t in mst:
             node1, node2, weight = t
             if node1 == str(source):
                 if node2 == str(destiny):
@@ -122,7 +127,7 @@ class InstallationManager(threading.Thread):
                 
                 srctemp = int(node2)
                 if self.__belong__(srctemp, mpath) == 0:
-                    mpath = self.__get_path__(srctemp, destiny, mpath)
+                    mpath = self.__get_path__(srctemp, destiny, mpath, mst)
                     last = mpath[len(mpath)-1]
                     if last == destiny:
                         break
@@ -139,7 +144,7 @@ class InstallationManager(threading.Thread):
             paths.append(path)
         
         return paths
-        
+    
     def __get_complete_group__(self):
         request = Request()
         request.id = self.__next_req_number__()
@@ -148,15 +153,21 @@ class InstallationManager(threading.Thread):
         
         self.socket.send( jsonMessage )
         jsonGroup = self.socket.recv()
+        
         group = GroupFactory().decodeJson( jsonGroup )
-        self.multicast_source = group.source
-        self.multicast_hosts = []
-        self.path_to_host = {}
-        for host in group.hosts:
-            if host.id != self.multicast_source:
-                self.multicast_hosts.append(host.id)
+        return group;
+        
+        
+    def __calc_paths_by_source__(self, mst, multicast_source, hosts):
+        path_to_host = {}
+        hosts.remove(multicast_source)
+        for host in hosts:
+            if host.id != multicast_source.id:
                 opath = []
-                self.path_to_host[host.id] = self.__get_path__(self.multicast_source, host.id, opath)
+                path_to_host[host.id] = self.__get_path__(multicast_source.id, host.id, opath, mst)
+        
+        hosts.append(multicast_source)
+        return path_to_host
         
     def __get_group__(self):
         request = Request()
@@ -167,18 +178,19 @@ class InstallationManager(threading.Thread):
         self.socket.send( jsonMessage )
         jsonGroup = self.socket.recv()
         group = GroupFactory().decodeJson( jsonGroup )
+        self.current_source = group.source
         self.active_hosts = []
         for host in group.hosts:
             self.active_hosts.append(host.id)
         
-    def __duplicate_paths__(self):
+    def __duplicate_paths__(self, mst):
         tmp = []
-        tmp.extend(self.mst)
-        for mytuple in self.mst:
+        tmp.extend(mst)
+        for mytuple in mst:
             node1,node2,peso = mytuple
             t = node2, node1, peso
             tmp.append(t)
-        self.mst = tmp
+        return tmp
         
     def __calcultate_initial_hops__(self):
         #Get the paths to all the active hosts

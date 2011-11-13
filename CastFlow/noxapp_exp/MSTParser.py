@@ -9,9 +9,23 @@ from commum.Model import Topology
 from heapq import heapify, heappop, heappush
 
 class MSTParser:
-    def __init__(self, topology):
-        self.topology = topology
+    def __init__(self, topology, source):
+        self.topology = self.__clean_topology__(topology)
+        
+        #Calcule the weight of the links
+        self.__calcLinksWeight__( source )
+        
+        #Parse the topology
         self.parse_topology()
+    
+    def __clean_topology__(self, topology):
+        for router in topology.routers:
+            router.distanceFromSource = -1
+            
+        for link in topology.links:
+            link.weight = -1
+        
+        return topology
         
     def parse_topology(self):
         edges = []
@@ -55,3 +69,69 @@ class MSTParser:
     
     def get_mst(self, algorithm = 'prim'):
         return self.__prim_algorithm__(self.nodes, self.edges)
+    
+    
+    def __calcLinksWeight__(self, source):
+        visitedNodes = []
+        nodesToVisit = []
+        link = self.topology.getLinkById(source.link)
+        source.distanceFromSource = 0
+        link.weight = 1
+        node = self.topology.getRouterById(source.router)
+
+        node.distanceFromSource = 1
+        
+        visitedNodes.append(source.id)
+        nodesToVisit.append(node)
+        
+        while len(nodesToVisit) > 0:
+            node = nodesToVisit.pop(0)
+            if node.id in visitedNodes:
+                #It's had already been calculed.
+                continue
+            
+            visitedNodes.append(node.id)
+            
+            if self.topology.isHost(node.id):
+                #it's a host
+                host = node
+                link = self.topology.getLinkById(host.link)
+                if link.weight == -1: 
+                    #The weight for this link hasn't been calculed
+                    link.weight = node.distanceFromSource + 1
+                elif link.weight > node.distanceFromSource + 1:
+                    link.weight = node.distanceFromSource + 1
+                
+                router = self.topology.getRouterById(host.router)
+                if router.distanceFromSource == -1:
+                    router.distanceFromSource = link.weight
+                elif router.distanceFromSource > link.weight:
+                    router.distanceFromSource = link.weight
+                
+                nodesToVisit.append(router)   
+                
+            else: 
+                #It's a router
+                thisrouter = node
+                for i in range(len(thisrouter.allports)):
+                    link = self.topology.getLinkById( thisrouter.links[i] )
+                    nodeid = thisrouter.allports[i]
+                    
+                    if link.weight == -1: 
+                    #The weight for this link hasn't been calculed
+                        link.weight = thisrouter.distanceFromSource + 1
+                    elif link.weight > thisrouter.distanceFromSource + 1:
+                        link.weight = thisrouter.distanceFromSource + 1
+                    
+                    _node = None
+                    if self.topology.isHost(nodeid):
+                        _node = self.topology.getHostById(nodeid)
+                    else:
+                        _node = self.topology.getRouterById(nodeid)
+                        
+                    if _node.distanceFromSource == -1:
+                        _node.distanceFromSource = link.weight
+                    elif _node.distanceFromSource > link.weight:
+                        _node.distanceFromSource = link.weight
+                
+                    nodesToVisit.append(_node)
