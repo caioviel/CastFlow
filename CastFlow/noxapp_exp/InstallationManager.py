@@ -211,13 +211,10 @@ class InstallationManager(threading.Thread):
         all_installs = []
         while len(hops) > 0:
             hop = hops.pop(0)
-            print 'hop: node', hop[0], '| nextNode', hop[2], '| previousNode', hop[1]
             installPath = InstallPath()
             installPath.routerId = hop[0]
             router = topo.getRouterById(installPath.routerId)
-            print router
             installPath.inputPort = router.getPortByNode(hop[1])
-            print installPath.inputPort
             
             nodeid = hop[2]
             if topo.isHost(nodeid):
@@ -271,23 +268,25 @@ class InstallationManager(threading.Thread):
             else:
                 print 'Invalid event received.'
                 continue
-                
-            print '\n\nInstalls to do:'
-            for install in self.get_installs_to_do():
-                print '\t', install
-        
-            print '\n\nInstalls to remove:'
-            for install in self.get_installs_to_remove():
-                print '\t', install
-                
+            
             self.has_installation = True
             if self.nox != None:
                 self.nox.install_routes()
+            else:
+                print '\n\nInstalls to do:'
+                for install in self.get_installs_to_do():
+                    print '\t', install
+        
+                print '\n\nInstalls to remove:'
+                for install in self.get_installs_to_remove():
+                    print '\t', install
+                
             
     def entry_event(self, event):
         new_paths = []
         for host in event.hosts:
             new_paths.append( self.path_to_host[host.id])
+            self.active_hosts.append(host.id)
             
         new_hops = self.__calcule_hops__(new_paths)
         has_changes = False
@@ -318,32 +317,28 @@ class InstallationManager(threading.Thread):
                     pass
                 else:
                     #The installation is different!
-                    self.installs_to_remove.append(old_install) #TODO: Verify if it's realy necessary
+                    #self.installs_to_remove.append(old_install) #TODO: Verify if it's realy necessary
                     self.installs_to_do.append(install)
                     self.installs_by_router[install.routerId] = install
         
     def exit_event(self, event):
-        obsolete_paths = []
         for host in event.hosts:
-            obsolete_paths.append( self.path_to_host[host.id])
+            self.active_hosts.remove(host.id)
             
-        new_hops = self.__calcule_hops__(obsolete_paths)
-        has_changes = False
-        for hop in new_hops:
-            if hop not in self.hops:
-                has_changes = True
-                self.hops.append(hop)
-        
-        if not has_changes:
-            # Nothing change at all.
-            return
-        
+        paths = []
+        for host in self.active_hosts:
+            paths.append(self.path_to_host[host])
+            
+        self.hops = self.__calcule_hops__(paths)
         self.hops.sort()
         
         new_installs = self.__generate_installs__()
         self.installs_to_do = []
+        self.installs_to_remove = []
+        keep_routers = []
         for install in new_installs:
             old_install = self.installs_by_router.get(install.routerId)
+            keep_routers.append(install.routerId)
             if old_install == None:
                 #There wasn't a installation in this router
                 self.installs_by_router[install.routerId] = install
@@ -356,9 +351,15 @@ class InstallationManager(threading.Thread):
                     pass
                 else:
                     #The installation is different!
-                    self.installs_to_remove.append(old_install) #TODO: Verify if it's realy necessary
+                    #self.installs_to_remove.append(old_install) #TODO: Verify if it's realy necessary
                     self.installs_to_do.append(install)
                     self.installs_by_router[install.routerId] = install
+                    
+        for routerId in self.installs_by_router.keys():
+            if routerId not in keep_routers:
+                self.installs_to_remove.append( self.installs_by_router.pop(routerId) )
+                    
+        
         
 if __name__ == '__main__':
     im = InstallationManager()
