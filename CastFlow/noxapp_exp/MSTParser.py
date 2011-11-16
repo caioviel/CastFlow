@@ -37,8 +37,7 @@ class MSTParser:
             string = string + str(h.id)
         
         nodes = list(string)
-    
-        # parseLinks
+            
         for l in self.topology.links:
             link = str(l.node1), str(l.node2), l.weight
             edges.append(link)

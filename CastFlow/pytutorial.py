@@ -20,6 +20,7 @@ class pytutorial(Component):
     def install_routes(self):
         print '\n\n\n\n\n'
         print '********** REMOVING OBSOLUTE ROUTES ***********'
+        self.im.collect_begin_installs()
         removes = self.im.installs_to_remove
         for install in removes:
             print 'Removing: ', install
@@ -47,6 +48,8 @@ class pytutorial(Component):
                 actions.append( [openflow.OFPAT_OUTPUT, [0, port] ] )
 
             self.install_datapath_flow(install.routerId, attrs, 3600, 3600, actions, None, openflow.OFP_DEFAULT_PRIORITY, install.inputPort, None)
+            
+        self.im.collect_end_installs()
 
     def __init__(self, ctxt):
         Component.__init__(self, ctxt)
