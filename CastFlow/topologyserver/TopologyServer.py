@@ -14,7 +14,6 @@ class TopologyServer(InternalInterface):
     '''
     classdocs
     '''
-
     def __init__(self, britefileName, port=8887):
         '''
         Constructor
