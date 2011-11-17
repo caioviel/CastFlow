@@ -73,7 +73,7 @@ elif sys.argv[1] == "-c":
                           socket.SOCK_DGRAM ) # UDP
     sock.bind( (UDP_IP,UDP_PORT) )
     
-    uuidstr = str(uuid.uuid4())
+    uuidstr = UDP_IP + '---' + str(uuid.uuid4())
     file = open(OUTPUT_DIR + uuidstr + ".log", 'w')
 
     header = "SOURCE;PACKET_ID;SENDED;RECEIVED;"
