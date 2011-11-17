@@ -23,21 +23,10 @@ def initsocket():
     s.connect( address )
     return LongMessageSocket(s)
 
-class cmdThread(threading.Thread):
-    def __init__(self, objNode, strCmd):
-    threading.Thread.__init__(self)
-        self.objNode = objNode
-        self.strCmd = strCmd
-    def run(self):
-        self.objNode.cmd( self.strCmd )
-
 def mnScript():
     "Creating a Mininet net"
 
-    net = Mininet( controller=RemoteController, switch=OVSKernelSwitch, autoSetMacs=True, listenPort=6634 )
-
-    print "*** Creating Remote Controller"
-    c0 = net.addController( 'c0' )
+    net = Mininet( controller=RemoteController, switch=OVSKernelSwitch, autoSetMacs=True, listenPort=7001 )
 
     topo = MyTopo()
     
@@ -73,7 +62,7 @@ def mnScript():
         print "*** Setup CA:FE ARP in " + h.name
         h.cmd("arp -s 10.0.2.254 ca:fe:ca:fe:ca:fe")
         print "*** Starting udpapp in " + h.name
-    h.cmd("udpapp -c "  + h.name  + " &")
+        h.cmd("udpapp -c "  + h.name  + " &")
         #t = cmdThread( h, "udpapp -c" )
         #t.start()
 
