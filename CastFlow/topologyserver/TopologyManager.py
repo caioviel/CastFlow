@@ -27,37 +27,80 @@ class TopologyManager(threading.Thread):
         self.multicast_group = []
         self.active_hosts = []
         self.inactive_hosts = []
-        self.multicast_source = -1
+        self.multicast_source = None
         self.eventListener = None
         self.is_running = False
         self.event_id = 0
-        self.poissonEntry = 2
-        self.poissonExit = 1
-        self.sleepMediam = 40
-        self.sleepStdDev = 20
+        
+        self.entry_number = 1
+        self.entry_poisson = False
+        self.exit_number = 1
+        self.exit_poisson = False
+        self.interval_mediam = 40
+        self.intera_stddev = 5
+        
+    def set_entry_events(self, entry_number, use_poisson = False):
+        self.entry_number = entry_number
+        self.entry_poisson = use_poisson
+        
+    def set_exit_events(self, exit_number, use_poisson = False):
+        self.exit_number = exit_number
+        self.exit_poisson = use_poisson
+        
+    def set_event_interval(self, interval_mediam, interval_stddev=5):
+        self.interval_mediam = interval_mediam
+        self.intera_stddev = interval_stddev
+        
         
     def getNextEventId(self):
         self.event_id += 1 
         return self.event_id
         
-    def importTopologyFromBrite(self, britefile):
-        parser = BriteParser(britefile)
+    def importTopologyFromBrite(self, britefile, group_size=0, initial_group_size=0, initial_source=0, delta_id=1):        
+        parser = BriteParser(britefile, delta_id)
         parser.doParse()
         self.all_hosts = parser.hosts
         self.links = parser.links
         self.routers = parser.routers
+        
         print 'Parser Done: routers', len(self.routers), ' | hosts', len(self.all_hosts), ' | links', len(self.links)
-        
         hosts_numbers = len(self.all_hosts)
-        self.__selectMulticastGroup__(hosts_numbers/3, hosts_numbers-1)
+        
+        if group_size != 0:
+            if hosts_numbers < group_size:
+                raise Exception('Demanded group is bigger than the topology!')
+            else:
+                if initial_source != 0:
+                    if not self.isHost(initial_source):
+                        raise Exception('Demanded source is invalid!')
+                    
+                    self.multicast_source = self.getHostById(initial_source)
+                    self.multicast_group.append(self.multicast_source)
+                    if group_size >= 2:
+                        self.__selectMulticastGroup__(group_size-1)
+                else:
+                    self.__selectMulticastGroup__(group_size)
+                    self.multicast_source = self.selectRandomHost(self.multicast_group)
+                    
+        else:
+            self.__selectMulticastGroup__(hosts_numbers/2 +1)
+            self.multicast_source = self.selectRandomHost(self.multicast_group)
+            
+            
         print 'Multicast Group Selected:', len(self.multicast_group), 'hosts'
-        
-        self.multicast_source = self.selectRandomHost(self.multicast_group)
         print 'Multicast Source: ', self.multicast_source
+                
         
-        self.__selectActiveHosts__()
+        if initial_group_size != 0:
+            if group_size - 1 < initial_group_size:
+                raise Exception('Initial group size is bigger than the group size')
+            else:
+                self.__selectActiveHosts__( initial_group_size )
+                
+        else:
+            self.__selectActiveHosts__( (len(self.multicast_group)-1) / 2)
+        
         print 'Active Hosts Selected:', len(self.active_hosts), 'hosts'
-        
         #self.__calcLinksWeight__()
         #print 'Links Weight Calculated'
         
@@ -66,9 +109,8 @@ class TopologyManager(threading.Thread):
         host_index = int(numpy.random.uniform(0.0, len(hosts)-1))
         return hosts[host_index]
     
-    def __selectMulticastGroup__(self, min_number, max_number):
-        #multicast_hosts_number = int(numpy.random.uniform(min_number, max_number))
-        multicast_hosts_number = len(self.all_hosts)/2 +1
+    def __selectMulticastGroup__(self, group_soze):
+        multicast_hosts_number = group_soze
     
         self.multicast_group = []
         while len(self.multicast_group) < multicast_hosts_number:
@@ -76,10 +118,13 @@ class TopologyManager(threading.Thread):
             if host not in self.multicast_group:
                 self.multicast_group.append(host)
     
-    def __selectActiveHosts__(self):
-        active_hosts_number = len(self.multicast_group)
-        while active_hosts_number >= len(self.multicast_group) -1 or active_hosts_number == 0:
-            active_hosts_number = int(numpy.random.normal(len(self.multicast_group)/2, 1.0))
+    def __selectActiveHosts__(self, active_hosts_number):
+        #active_hosts_number = len(self.multicast_group)
+        #while active_hosts_number >= len(self.multicast_group) -1 or active_hosts_number == 0:
+        #    active_hosts_number = int(numpy.random.normal(len(self.multicast_group)/2, 1.0))
+        
+        if active_hosts_number == 0:
+            return
         
         self.active_hosts = []
         while len(self.active_hosts) < active_hosts_number:
@@ -107,18 +152,29 @@ class TopologyManager(threading.Thread):
             
     def run(self):
         print 'Starting to generate events...'
+        generate_exit = True
         while self.is_running:
-            #Dormir um tempo aleatorio seguindo uma distrubuicao normal de media 40 e variancia 15 (em segundos)
-            sleepingTime = numpy.random.normal(self.sleepMediam, self.sleepStdDev)
+            #Dormir um tempo aleatorio seguindo uma distrubuicao normal de media 40 e variancia 5 (em segundos)
+            sleepingTime = numpy.random.normal(self.interval_mediam, self.interval_mediam)
+            print 'Sleeping for', sleepingTime
             time.sleep(sleepingTime)
             
             #50% de chances de ser um evento de entrada / 50% de ser um evento de saida
+            #event = None
+            #value = numpy.random.random()
+            #if value >= 0.5: #Evento de entrada
+            #    event = self.generateEntryEvent()
+            #else: #Evento de saida
+            #    event = self.generateExitEvent()
+            
             event = None
-            value = numpy.random.random()
-            if value >= 0.5: #Evento de entrada
-                event = self.generateEntryEvent()
-            else: #Evento de saida
+            if generate_exit:
                 event = self.generateExitEvent()
+            else:
+                event = self.generateEntryEvent()
+                
+            generate_exit = not generate_exit
+            print event.hosts
             
             if len(event.hosts) > 0:
                 print 'Event generated.'
@@ -126,7 +182,10 @@ class TopologyManager(threading.Thread):
             
     def generateEntryEvent(self):
         entering_hosts = []
-        entering_hosts_number = numpy.random.poisson(self.poissonEntry);
+        entering_hosts_number = self.entry_number
+        if self.entry_poisson:
+            entering_hosts_number = numpy.random.poisson(self.entry_number);
+            
         while len(entering_hosts) < entering_hosts_number:
             host = self.selectRandomHost(self.inactive_hosts)
             if host not in entering_hosts:
@@ -142,7 +201,10 @@ class TopologyManager(threading.Thread):
     
     def generateExitEvent(self):
         exiting_hosts = []
-        exiting_hosts_number = numpy.random.poisson(self.poissonExit);
+        exiting_hosts_number = self.exit_number
+        if self.exit_poisson:
+            exiting_hosts_number = numpy.random.poisson(self.poissonExit);
+            
         while len(exiting_hosts) < exiting_hosts_number:
             host = self.selectRandomHost(self.active_hosts)
             if host not in exiting_hosts:

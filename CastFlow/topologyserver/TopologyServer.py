@@ -14,15 +14,15 @@ class TopologyServer(InternalInterface):
     '''
     classdocs
     '''
-    def __init__(self, britefileName, port=8887):
+    def __init__(self, topology_manager, generate_events = False, port=8887):
         '''
         Constructor
         '''
         self.startListeners = []
         self.eventListeners = []
         self.serverPort = port;
-        self.topologyManager = TopologyManager()
-        self.topologyManager.importTopologyFromBrite(britefileName)
+        self.topologyManager = topology_manager
+        self.generate_events = generate_events;
         self.topologyManager.setEventsListener(self)
         
     def startListen(self):
@@ -46,6 +46,7 @@ class TopologyServer(InternalInterface):
     
     def getMulticastGroup(self, complete=False):
         group = Group()
+        print self.topologyManager.multicast_source
         group.source = self.topologyManager.multicast_source.id
         if (complete):
             group.hosts = self.topologyManager.multicast_group
@@ -54,8 +55,9 @@ class TopologyServer(InternalInterface):
         return group
     
     def addEventListeners(self, handler):
-        '''if not self.topologyManager.is_running:
-            self.topologyManager.startEvents()'''
+        if self.generate_events:
+            if not self.topologyManager.is_running:
+                self.topologyManager.startEvents()
         
         if handler not in self.eventListeners:
             self.eventListeners.append(handler)

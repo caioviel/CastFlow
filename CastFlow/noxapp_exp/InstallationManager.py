@@ -11,6 +11,7 @@ from commum.DataCollector import NoxAppCollector
 
 import threading
 import time
+import sys
 
 class InstallPath:
     def __init__(self):
@@ -65,12 +66,17 @@ class InstallationManager(threading.Thread):
         
         self.dc = NoxAppCollector()
         self.dc.write_header()
-        self.dc.collect_begin_mst(len(self.topology.hosts), time())
+        self.dc.collect_begin_mst(len(self.topology.hosts), time.time())
+        current = 1
         for host in complete_group.hosts:
             mst = MSTParser(self.topology, host).get_mst( algorithm = 'prim' )
             mst = self.__duplicate_paths__(mst)
-            self.paths_by_source[host.id] = self.__calc_paths_by_source__(mst, host, temp_hosts)
-        self.dc.collect_end_mst(len(self.topology.hosts), time())
+            mst.sort()
+            paths = self.__calc_paths_by_source__(mst, host, temp_hosts)
+            
+            self.paths_by_source[host.id] = paths
+            current += 1
+        self.dc.collect_end_mst(len(self.topology.hosts), time.time())
         
         #Get the actual Multicast Group from the Topology Server
         self.__get_group__()
@@ -89,7 +95,7 @@ class InstallationManager(threading.Thread):
         self.installs_to_remove = []
         self.installs_to_do = self.current_installs
         
-        self.dc.collect_event_effects(None, len(self.installs_to_do), len(self.installs_to_remove), time())
+        self.dc.collect_event_effects(None, len(self.installs_to_do), len(self.installs_to_remove), time.time())
         
         self.has_installation = True
         
@@ -143,6 +149,61 @@ class InstallationManager(threading.Thread):
                         mpath.pop()
         return mpath
     
+    def __calc_path__(self, source, destiny, mst, mpath):
+        if mpath == None:
+            mpath = []
+            
+        print destiny, '-->', source, ':', mpath
+            
+        mpath.insert(0, destiny)
+        index = 0
+        str_source = str(source)
+        str_destiny = str(destiny)
+        while index < len(mst):
+            node1, node2, weight = mst[index]
+            if node1 != str_destiny:
+                # Just go on till find the first entry that match the destiny
+                index += 1
+            else:
+                if node2 == str_source:
+                    # Matched source and destiny.
+                    mpath.insert(0, source)
+                    return mpath
+                
+                # From all the possible links, choose the one with lesser weight
+                # This check is to avoid loops
+                if int(node2) not in mpath:
+                    next_node = node2
+                    lesser_weight = weight
+                else:
+                    #A very big weight.
+                    next_node = -1
+                    lesser_weight = 1000000
+                    
+                index += 1
+                if (index < len(mst)):
+                    node1, node2, weight = mst[index]
+                    while index < len(mst) and str_destiny == node1:
+                        if node2 == str_source:
+                            # Matched source and destiny.
+                            mpath.insert(0, source)
+                            return mpath
+                        
+                        if int(node2) not in mpath and weight < lesser_weight:
+                            lesser_weight = weight
+                            next_node = node2
+                        index += 1
+                        if (index < len(mst)):
+                            node1, node2, weight = mst[index]
+                
+                # Recursinve call
+                if next_node != -1:
+                    return self.__calc_path__(source, int(next_node), mst, mpath)
+                else:
+                    print 'Error during calculing rotes!'
+                    sys.exit()
+                        
+    
     def get_path(self, nodeid):
         return self.path_to_host[nodeid]
     
@@ -169,10 +230,15 @@ class InstallationManager(threading.Thread):
     def __calc_paths_by_source__(self, mst, multicast_source, hosts):
         path_to_host = {}
         hosts.remove(multicast_source)
+        print mst
         for host in hosts:
             if host.id != multicast_source.id:
                 opath = []
                 path_to_host[host.id] = self.__get_path__(multicast_source.id, host.id, opath, mst)
+                #opath = self.__calc_path__(multicast_source.id, host.id, mst, None)
+                #print 'Path Found:', opath
+                path_to_host[host.id] = opath
+                
         
         hosts.append(multicast_source)
         return path_to_host
@@ -262,10 +328,10 @@ class InstallationManager(threading.Thread):
         return all_installs
     
     def collect_begin_installs(self):
-        self.dc.collect_begin_installing_flows(len(self.topology.hosts), len(self.active_hosts), time())
+        self.dc.collect_begin_installing_flows(len(self.topology.hosts), len(self.active_hosts), time.time())
         
     def collect_end_installs(self):
-        self.dc.collect_end_installing_flows(len(self.topology.hosts), len(self.active_hosts), time())
+        self.dc.collect_end_installing_flows(len(self.topology.hosts), len(self.active_hosts), time.time())
     
     def run(self):
         #Send a Request Start to the server
@@ -299,7 +365,7 @@ class InstallationManager(threading.Thread):
                 continue
             
             if self.nox != None:
-                self.dc.collect_event_effects(event, len(self.installs_to_do), len(self.installs_to_remove), time())
+                self.dc.collect_event_effects(event, len(self.installs_to_do), len(self.installs_to_remove), time.time())
                 
                 self.nox.install_routes()
             else:

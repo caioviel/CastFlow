@@ -25,9 +25,11 @@ class DataCollector(object):
         self.file.write(name + ': ' + self.filename + '\n')
         str_time = time.strftime('%d/%m/%Y - %H:%M:%S', time.localtime() )
         self.file.write( str_time + '\n' )
+        self.file.flush()
             
     def collect(self, str_data):
         self.file.write(str_data + "\n")
+        self.file.flush()
         
 class NoxAppCollector(DataCollector):
     def __init__(self, prename='noxapp'):

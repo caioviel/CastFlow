@@ -31,7 +31,18 @@ def getTopology():
     request.action = request.ACTION.GET_TOPOLOGY
     s.send (request.toJson() )
     jsonStr = s.recv()
-    print jsonStr
+    topology = TopologyFactory().decodeJson(jsonStr)
+    for r in topology.routers:
+        print '\tRouter', r.id
+        for node in r.allports:
+            print '\t\tport', r.getPortByNode(node),
+            if topology.isHost(node):
+                print ': Host', node,
+            else:
+                print ':Router', node,
+            print '(link',  r.getLinkByNode(node), ')'
+        print '\n'
+            
     
 def getGroup():
     s = initsocket()
