@@ -26,7 +26,7 @@ def udpserver( IPs, PORT ):
     SRC_UUID = str(uuid.uuid4()) #Get a UUID for this server
     PKT_LONG = long(0) #Start a packet counter
     print "SRC UUID:", SRC_UUID
-    print "UDP target IP:", UDP_CLIENTS
+    print "UDP target IP:", IPs
     print "UDP target port:", UDP_PORT
     print "Sending interval:", NSECONDS, " seconds"
 
