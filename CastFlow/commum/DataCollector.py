@@ -4,8 +4,7 @@ Created on Nov 13, 2011
 @author: caioviel
 '''
 
-#DIRECTORY = '/tmp/'
-DIRECTORY = ''
+DIRECTORY = '/tmp/'
 import uuid
 import time
 
