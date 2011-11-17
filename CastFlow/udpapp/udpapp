@@ -10,8 +10,8 @@
 """
 import sys
 import socket
-#import datetime
-import os
+#import os
+import uuid
 from time import time, sleep
 
 UDP_PORT=8885 #Port Listening/Sending
@@ -21,23 +21,11 @@ NSECONDS=0.030 #Send Period
 MULTICAST_IP = "10.0.2.254"
 MULTICAST_MAC = "ca:fe:ca:fe:ca:fe"
 
-#Register the multicast ip and mac on the arp table.
-os.system('arp -s ' + MULTICAST_IP + ' ' + MULTICAST_MAC)
+def udpserver( IPs, PORT ):
+    SRC_UUID = str(uuid.uuid4()) #Get a UUID for this server
+	PKT_LONG = long(0) #Start a packet counter
 
-#Arguments should be 2 or more
-if len( sys.argv ) < 2:
-    print " "
-    print "Usage ="
-    print "      Server:"
-    print "              python udpapp.py -s CLIENT_IP1 CLIENT_IP2 CLIENT_IPN"
-    print "      Client:"
-    print "              python udpapp.py -c HOST_IP"
-    print " "
-
-#Server
-elif sys.argv[1] == "-s":
-    UDP_CLIENTS=sys.argv[2:] #Get the arguments starting from the third
-
+	print "SRC UUID:", SRC_UUID
     print "UDP target IP:", UDP_CLIENTS
     print "UDP target port:", UDP_PORT
     print "Sending interval:", NSECONDS, " seconds"
@@ -47,12 +35,33 @@ elif sys.argv[1] == "-s":
 
     #Send each NSECONDS for each client
     while True:
-        for UDP_IP in UDP_CLIENTS:
-            sock.sendto( repr( time() ) + "     /\\", #str( datetime.datetime.now() ),
+        for UDP_IP in IPs:
+            sock.sendto( SRC_UUID + ";" + str( PKT_LONG ) + ";" + repr( time() ), ## SOURCE;PACKET_ID;SENDED
                          (UDP_IP, UDP_PORT) )
-            
+        
+	    PKT_LONG += 1
         sleep( NSECONDS )
 
+
+#Register the multicast ip and mac on the arp table.
+#os.system('arp -s ' + MULTICAST_IP + ' ' + MULTICAST_MAC)
+
+#Arguments should be 2 or more
+if len( sys.argv ) < 2:
+    print " "
+    print "Usage ="
+    print "      Server:"
+    print "              Unicast=    -s CLIENT_IP1 CLIENT_IP2 CLIENT_IPN"
+    print "              Multicast=  -m"
+    print "      Client:"
+    print "              -c"
+    print " "
+
+#Server
+elif sys.argv[1] == "-s":
+    UDP_CLIENTS=sys.argv[2:] #Get the arguments starting from the third
+	udpserver( UDP_CLIENTS, UDP_PORT )
+	
 #Client
 elif sys.argv[1] == "-c":
     if len(sys.argv) > 3:
@@ -61,28 +70,17 @@ elif sys.argv[1] == "-c":
         UDP_IP = ""
     
     sock = socket.socket( socket.AF_INET,     # Internet
-                          socket.SOCK_DGRAM )     # UDP
+                          socket.SOCK_DGRAM ) # UDP
     sock.bind( (UDP_IP,UDP_PORT) )
 
+	print "SOURCE;PACKET_ID;SENDED;RECEIVED;"
     while True:
         data, addr = sock.recvfrom( 1024 )   # buffer size is 1024 bytes
-        print "received on ", repr( time() ),  "     \\/" ##datetime.datetime.now()
-        print "sended on   ", data
+        print data + ";" + repr( time() )
         
 elif sys.argv[1] == "-m":
-    print "UDP multiast IP:", MULTICAST_IP
-    print "UDP multicast port:", UDP_PORT
-    print "Sending interval:", NSECONDS, " seconds"
-    
-    sock = socket.socket( socket.AF_INET,        # Internet
-                          socket.SOCK_DGRAM )    # UDP
-    
-    while True:
-        sock.sendto( repr( time() ) + "     /\\", #str( datetime.datetime.now() ),
-                    (MULTICAST_IP, UDP_PORT) )
-            
-        sleep( NSECONDS )
+    udpserver( [ MULTICAST_IP ], UDP_PORT )
 
-#Ops...
+#Oops...
 else:
     print "Oops..Something bad happened, check your arguments!"
