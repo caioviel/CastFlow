@@ -20,13 +20,13 @@ NSECONDS=0.030 #Send Period
 
 MULTICAST_IP = "10.0.2.254"
 MULTICAST_MAC = "ca:fe:ca:fe:ca:fe"
+OUTPUT_DIR = "/home/openflow/logs/"
 
 def udpserver( IPs, PORT ):
     SRC_UUID = str(uuid.uuid4()) #Get a UUID for this server
-	PKT_LONG = long(0) #Start a packet counter
-
-	print "SRC UUID:", SRC_UUID
-    print "UDP target IP:", UDP_CLIENTS
+    PKT_LONG = long(0) #Start a packet counter
+    print "SRC UUID:", SRC_UUID
+    print "UDP target IP:", IPs
     print "UDP target port:", UDP_PORT
     print "Sending interval:", NSECONDS, " seconds"
 
@@ -60,7 +60,7 @@ if len( sys.argv ) < 2:
 #Server
 elif sys.argv[1] == "-s":
     UDP_CLIENTS=sys.argv[2:] #Get the arguments starting from the third
-	udpserver( UDP_CLIENTS, UDP_PORT )
+    udpserver( UDP_CLIENTS, UDP_PORT )
 	
 #Client
 elif sys.argv[1] == "-c":
@@ -72,11 +72,20 @@ elif sys.argv[1] == "-c":
     sock = socket.socket( socket.AF_INET,     # Internet
                           socket.SOCK_DGRAM ) # UDP
     sock.bind( (UDP_IP,UDP_PORT) )
+    
+    uuidstr = str(uuid.uuid4())
+    file = open(OUTPUT_DIR + uuidstr + ".log", 'w')
 
-	print "SOURCE;PACKET_ID;SENDED;RECEIVED;"
+    header = "SOURCE;PACKET_ID;SENDED;RECEIVED;"
+    print header
+    file.write( header + '\n' )
+    file.flush()
     while True:
         data, addr = sock.recvfrom( 1024 )   # buffer size is 1024 bytes
-        print data + ";" + repr( time() )
+        str = data + ";" + repr( time() )
+        print str
+        file.write(str + '\n')
+        file.flush()
         
 elif sys.argv[1] == "-m":
     udpserver( [ MULTICAST_IP ], UDP_PORT )
