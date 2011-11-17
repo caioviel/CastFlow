@@ -22,7 +22,7 @@ class TopologyServer(InternalInterface):
         self.eventListeners = []
         self.serverPort = port;
         self.topologyManager = topology_manager
-        self.generate_events = False;
+        self.generate_events = generate_events;
         self.topologyManager.setEventsListener(self)
         
     def startListen(self):

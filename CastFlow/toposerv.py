@@ -10,7 +10,7 @@ from topologyserver.TopologyServer import TopologyServer
 from topologyserver.TopologyManager import TopologyManager
 
 def help():
-    print 'Usage: toposerv -f <FILE> [-g -s -t -i -o -I -O]'
+    print 'Usage: toposerv -f <FILE> [-g -s -t -i -o -I -O --id-delta]'
     print'\t--file, -f <FILE>\t\tSet the brite file what will be used to generate the topology.'
     print'\t--group, -g <N> [<M>]\t\tSet the multicast group total size (<N>) and'
     print                    '\t\t\t\t\t   and initial active hosts number (<M>).'
@@ -20,6 +20,8 @@ def help():
     print '\t--out, -o <N>\t\t\tSet the number of hosts for exitGroup events.'
     print '\t--IN, -I <N>\t\t\tSet the parameter for Poisson distribution for entryGroup events.'
     print '\t--OUT, -O <N>\t\t\tSet the parameter for Poisson distribution for exitGroup events.'
+    print '\t--delta, -d <N>\t\tSet the delta of routers/links ids parsed form brite files.'
+    
 
 groupSize = 0
 groupInitialSize = 0
@@ -30,6 +32,7 @@ entryPoisson = False
 entryNumber = 1
 exitPoisson = False
 exitNumber = 1
+delta = 1
 
 if (len(sys.argv) < 0):
     print 'Error: You must specify the britefile.'
@@ -134,6 +137,13 @@ while argIndex < len(sys.argv):
             print 'Error: Invalid argument number.'
             print 'Try toposerv -h for help.'
             sys.exit()
+    elif arg == '-d' or arg == '--delta':
+        if argIndex +1 < len(sys.argv):
+            argIndex += 1
+            delta = int(sys.argv[argIndex])
+        else:
+            print 'Error: Invalid argument number.'
+            print 'Try toposerv -h for help.'
         
     else:
         print 'Error: Invalid argument', arg 
@@ -148,6 +158,8 @@ if groupSize != 0:
     print 'Multicast Group Size:', groupSize
 else:
     print 'Multicast Group Size: Default (1/2 nodes)'
+    
+print 'Delta Ids:', delta
     
 if groupInitialSize != 0:
     print 'Multicast Group Initial Hosts:', groupInitialSize
@@ -176,7 +188,7 @@ topomgr = TopologyManager()
 topomgr.set_event_interval(eventTime)
 topomgr.set_entry_events(entryNumber, entryPoisson)
 topomgr.set_exit_events(exitNumber, exitPoisson)
-topomgr.importTopologyFromBrite(fileName, groupSize, groupInitialSize, source)
+topomgr.importTopologyFromBrite(fileName, groupSize, groupInitialSize, source, delta)
 
 server = TopologyServer(topomgr, hasEvent)
 server.startListen()    

@@ -56,8 +56,8 @@ class TopologyManager(threading.Thread):
         self.event_id += 1 
         return self.event_id
         
-    def importTopologyFromBrite(self, britefile, group_size=0, initial_group_size=0, initial_source=0):        
-        parser = BriteParser(britefile)
+    def importTopologyFromBrite(self, britefile, group_size=0, initial_group_size=0, initial_source=0, delta_id=1):        
+        parser = BriteParser(britefile, delta_id)
         parser.doParse()
         self.all_hosts = parser.hosts
         self.links = parser.links
@@ -156,6 +156,7 @@ class TopologyManager(threading.Thread):
         while self.is_running:
             #Dormir um tempo aleatorio seguindo uma distrubuicao normal de media 40 e variancia 5 (em segundos)
             sleepingTime = numpy.random.normal(self.interval_mediam, self.interval_mediam)
+            print 'Sleeping for', sleepingTime
             time.sleep(sleepingTime)
             
             #50% de chances de ser um evento de entrada / 50% de ser um evento de saida
@@ -167,12 +168,13 @@ class TopologyManager(threading.Thread):
             #    event = self.generateExitEvent()
             
             event = None
-            if generate_Exit:
+            if generate_exit:
                 event = self.generateExitEvent()
             else:
                 event = self.generateEntryEvent()
                 
             generate_exit = not generate_exit
+            print event.hosts
             
             if len(event.hosts) > 0:
                 print 'Event generated.'
@@ -199,7 +201,7 @@ class TopologyManager(threading.Thread):
     
     def generateExitEvent(self):
         exiting_hosts = []
-        exiting_hosts_number = self.exit_poisson
+        exiting_hosts_number = self.exit_number
         if self.exit_poisson:
             exiting_hosts_number = numpy.random.poisson(self.poissonExit);
             
