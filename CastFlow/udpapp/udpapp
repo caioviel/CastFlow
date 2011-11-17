@@ -24,9 +24,8 @@ OUTPUT_DIR = "/home/openflow/logs/"
 
 def udpserver( IPs, PORT ):
     SRC_UUID = str(uuid.uuid4()) #Get a UUID for this server
-	PKT_LONG = long(0) #Start a packet counter
-
-	print "SRC UUID:", SRC_UUID
+    PKT_LONG = long(0) #Start a packet counter
+    print "SRC UUID:", SRC_UUID
     print "UDP target IP:", UDP_CLIENTS
     print "UDP target port:", UDP_PORT
     print "Sending interval:", NSECONDS, " seconds"
@@ -61,7 +60,7 @@ if len( sys.argv ) < 2:
 #Server
 elif sys.argv[1] == "-s":
     UDP_CLIENTS=sys.argv[2:] #Get the arguments starting from the third
-	udpserver( UDP_CLIENTS, UDP_PORT )
+    udpserver( UDP_CLIENTS, UDP_PORT )
 	
 #Client
 elif sys.argv[1] == "-c":
@@ -78,7 +77,7 @@ elif sys.argv[1] == "-c":
     file = open(OUTPUT_DIR + uuidstr + ".log", 'w')
 
     header = "SOURCE;PACKET_ID;SENDED;RECEIVED;"
-	print header
+    print header
     file.write( header + '\n' )
     file.flush()
     while True:

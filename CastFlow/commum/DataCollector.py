@@ -4,7 +4,7 @@ Created on Nov 13, 2011
 @author: caioviel
 '''
 
-DIRECTORY = '/tmp/'
+DIRECTORY = '/home/openflow/logs'
 import uuid
 import time
 
