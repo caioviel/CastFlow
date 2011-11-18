@@ -52,19 +52,16 @@ def mnScript():
     src = net.nameToNode[ "h" + str(group.source) ]
     print "*** Setup CA:FE ARP in source"
     src.cmd("arp -s 10.0.2.254 ca:fe:ca:fe:ca:fe")
-    print "*** Starting udpapp in source"
-    src.cmd("udpapp -m &")
-    #t = cmdThread( src, "udpapp -m")
-    #t.start()
-
+    print "*** Start udpapp in source manually ;)"
+    #src.cmd("udpapp -m &")
+    
     for host in group.hosts:
         h = net.nameToNode[ "h" + str(host.id) ]
         print "*** Setup CA:FE ARP in " + h.name
         h.cmd("arp -s 10.0.2.254 ca:fe:ca:fe:ca:fe")
         print "*** Starting udpapp in " + h.name
         h.cmd("udpapp -c "  + h.name  + " &")
-        #t = cmdThread( h, "udpapp -c" )
-        #t.start()
+		sleep( 1 )
 
     print "*** Starting CLI ***"
     CLI( net )
