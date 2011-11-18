@@ -61,7 +61,7 @@ if len( sys.argv ) < 2:
     print "              Unicast=    -s CLIENT_IP1 CLIENT_IP2 CLIENT_IPN"
     print "              Multicast=  -m"
     print "      Client:"
-    print "              -c"
+    print "              -c HOST_NAME"
     print " "
 
 #Server
@@ -72,8 +72,17 @@ elif sys.argv[1] == "-s":
 #Client
 elif sys.argv[1] == "-c":
     HOST_NAME = ""
+	FORMAT = 'human'
     if len(sys.argv) >= 3:
-        HOST_NAME=sys.argv[2]     #Third argument it's the binding IP
+        if sys.argv[2] == "--format-csv":
+            FORMAT = 'csv'
+        elif sys.argv[2] == "--format-human":
+            FORMAT = 'human'
+        else:
+            HOST_NAME = sys.argv[2]
+            FORMAT = 'human'
+        if len(sys.argv) >= 4:
+            HOST_NAME = sys.argv[4]
 
     UDP_IP = ""
     
@@ -82,9 +91,9 @@ elif sys.argv[1] == "-c":
     sock.bind( (UDP_IP,UDP_PORT) )
     
     uuidstr = HOST_NAME + '---' + str(uuid.uuid4())
-    dc = UdpAppCollector('udpapp-' + HOST_NAME + '---')
+    dc = UdpAppCollector(prename = 'udpapp-' + HOST_NAME + '---', format = FORMAT)
     
-    header = "SOURCE;PACKET_ID;SENDED;RECEIVED;"
+    #header = "SOURCE;PACKET_ID;SENDED;RECEIVED;"
     data, addr = sock.recvfrom( 1024 )   # buffer size is 1024 bytes
     local_timestamp = repr( time() )
     source_id, packet_number, server_timestamp = parse_packet(data)
