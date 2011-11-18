@@ -69,20 +69,37 @@ class InstallationManager(threading.Thread):
         self.dc.collect_begin_mst(len(self.topology.hosts), time.time())
         current = 1
         for host in complete_group.hosts:
+            #begin_mst_time = time.time()
             mst = MSTParser(self.topology, host).get_mst( algorithm = 'prim' )
-            mst = self.__duplicate_paths__(mst)
-            mst.sort()
-            paths = self.__calc_paths_by_source__(mst, host, temp_hosts)
             
+            #begin_dp_time = time.time()
+            mst_dict = self.__generate_mst_dic__(mst)
+            weight_dict = self.__calc_weight__(host, mst_dict)
+            paths = self.my__calc_paths_by_source__(host, temp_hosts, mst_dict, weight_dict)
+            
+            #begin_bt_time = time.time()
+            #mst = self.__duplicate_paths__(mst)
+            #paths = self.__calc_paths_by_source__(mst, host, temp_hosts)
+            #end_time = time.time()
+            
+            #print 'Programacao Dinamica:\n\t', _paths
+            #print '\n'
+            #print 'Backing Tracking:\n\t', paths
+            #print '\n'
+            #print 'MST Time:', repr (begin_dp_time - begin_mst_time)
+            #print 'Tempo da Programao Dinamica:', repr (begin_bt_time - begin_dp_time)
+            #print 'Tempo do Backing Tracking:', repr (end_time - begin_bt_time)
+            #sys.exit()
             self.paths_by_source[host.id] = paths
             current += 1
+            
         self.dc.collect_end_mst(len(self.topology.hosts), time.time())
         
         #Get the actual Multicast Group from the Topology Server
         self.__get_group__()
         self.path_to_host = self.paths_by_source[self.current_source]
-        
         #Calculate the initial installation hops
+        self.dc.collect_begin_paths(len(self.active_hosts), time.time())
         self.__calcultate_initial_hops__()
         
         #Generate the initial openflow installations list
@@ -90,6 +107,8 @@ class InstallationManager(threading.Thread):
         self.installs_by_router = {}
         for install in self.current_installs:
             self.installs_by_router[install.routerId] = install
+        
+        self.dc.collect_end_paths(len(self.active_hosts), time.time())
         
         #Set the begin configurations status
         self.installs_to_remove = []
@@ -149,60 +168,64 @@ class InstallationManager(threading.Thread):
                         mpath.pop()
         return mpath
     
-    def __calc_path__(self, source, destiny, mst, mpath):
-        if mpath == None:
-            mpath = []
-            
-        print destiny, '-->', source, ':', mpath
-            
-        mpath.insert(0, destiny)
-        index = 0
-        str_source = str(source)
-        str_destiny = str(destiny)
-        while index < len(mst):
-            node1, node2, weight = mst[index]
-            if node1 != str_destiny:
-                # Just go on till find the first entry that match the destiny
-                index += 1
+    def __generate_mst_dic__(self, mst):
+        mst_dictionary = {}
+        for t in mst:
+            node1, node2, weight = t
+            if mst_dictionary.has_key(int(node1)):
+                mst_dictionary[int(node1)].append(int(node2))
             else:
-                if node2 == str_source:
-                    # Matched source and destiny.
-                    mpath.insert(0, source)
-                    return mpath
+                mst_dictionary[int(node1)] = []
+                mst_dictionary[int(node1)].append(int(node2))
                 
-                # From all the possible links, choose the one with lesser weight
-                # This check is to avoid loops
-                if int(node2) not in mpath:
-                    next_node = node2
-                    lesser_weight = weight
-                else:
-                    #A very big weight.
-                    next_node = -1
-                    lesser_weight = 1000000
+            if mst_dictionary.has_key(int(node2)):
+                mst_dictionary[int(node2)].append(int(node1))
+            else:
+                mst_dictionary[int(node2)] = []
+                mst_dictionary[int(node2)].append(int(node1))
+        
+        return mst_dictionary
+    
+    def __calc_weight__(self, source, mst_dict):
+        weight_dict = {}
+        calculated_nodes = []
+        nodes_to_calculate = []
+        weight_dict[source.id] = 0
+        for node in mst_dict[source.id]:
+            nodes_to_calculate.append((node, 1))
+        
+        calculated_nodes.append(source.id)
+        
+        while len(nodes_to_calculate) > 0:
+            nodeid, weight = nodes_to_calculate.pop(0)
+            if nodeid not in calculated_nodes:
+                weight_dict[nodeid] = weight
+                calculated_nodes.append(nodeid)
+                for child_node in mst_dict[nodeid]:
+                    nodes_to_calculate.append((child_node, weight + 1))
                     
-                index += 1
-                if (index < len(mst)):
-                    node1, node2, weight = mst[index]
-                    while index < len(mst) and str_destiny == node1:
-                        if node2 == str_source:
-                            # Matched source and destiny.
-                            mpath.insert(0, source)
-                            return mpath
-                        
-                        if int(node2) not in mpath and weight < lesser_weight:
-                            lesser_weight = weight
-                            next_node = node2
-                        index += 1
-                        if (index < len(mst)):
-                            node1, node2, weight = mst[index]
-                
-                # Recursinve call
-                if next_node != -1:
-                    return self.__calc_path__(source, int(next_node), mst, mpath)
-                else:
-                    print 'Error during calculing rotes!'
-                    sys.exit()
-                        
+        return weight_dict
+    
+    def __calc_path__(self, source, destiny, mst_dict, weight_dict):
+        path = []
+        path.insert(0, destiny)
+        linked_nodes = mst_dict[destiny]
+        next_node = linked_nodes[0]
+        next_node_weight = weight_dict[linked_nodes[0]]
+        while True:
+            for node in linked_nodes:
+                if node == source:
+                    path.insert(0, node)
+                    return path
+                elif weight_dict[node] < next_node_weight:
+                    next_node = node
+                    next_node_weight = weight_dict[node]
+                    
+            path.insert(0, next_node)     
+            linked_nodes = mst_dict[next_node]
+            next_node = linked_nodes[0]
+            next_node_weight = weight_dict[linked_nodes[0]]
+
     
     def get_path(self, nodeid):
         return self.path_to_host[nodeid]
@@ -229,18 +252,24 @@ class InstallationManager(threading.Thread):
         
     def __calc_paths_by_source__(self, mst, multicast_source, hosts):
         path_to_host = {}
-        hosts.remove(multicast_source)
-        print mst
         for host in hosts:
             if host.id != multicast_source.id:
                 opath = []
-                path_to_host[host.id] = self.__get_path__(multicast_source.id, host.id, opath, mst)
-                #opath = self.__calc_path__(multicast_source.id, host.id, mst, None)
-                #print 'Path Found:', opath
+                self.__get_path__(multicast_source.id, host.id, opath, mst)
                 path_to_host[host.id] = opath
                 
         
-        hosts.append(multicast_source)
+        #hosts.append(multicast_source)
+        return path_to_host
+    
+    def my__calc_paths_by_source__(self, source, hosts, mst_dict, weight_dict):
+        path_to_host = {}
+        for destiny in hosts:
+            if destiny.id != source.id:
+                path_to_host[destiny.id] = self.__calc_path__(source.id, destiny.id, mst_dict, weight_dict)
+                
+        
+        #hosts.append(multicast_source)
         return path_to_host
         
     def __get_group__(self):
@@ -353,13 +382,19 @@ class InstallationManager(threading.Thread):
             event = EventFactory().decodeJson( jsonEvent )
             if event.type == "entry":
                 print 'Entry Event received.'
+                self.dc.collect_begin_paths(len(self.active_hosts), time.time())
                 self.entry_event(event)
+                self.dc.collect_end_paths(len(self.active_hosts), time.time())
             elif event.type == "exit":
                 print 'Exit Event received.'
+                self.dc.collect_begin_paths(len(self.active_hosts), time.time())
                 self.exit_event(event)
+                self.dc.collect_end_paths(len(self.active_hosts), time.time())
             elif event.type == "changeSource":
                 print 'Change Source Event received'
+                self.dc.collect_begin_paths(len(self.active_hosts), time.time())
                 self.change_source_event(event)
+                self.dc.collect_end_paths(len(self.active_hosts), time.time())
             else:
                 print 'Invalid event received.'
                 continue

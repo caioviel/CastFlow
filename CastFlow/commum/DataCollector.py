@@ -4,7 +4,7 @@ Created on Nov 13, 2011
 @author: caioviel
 '''
 
-DIRECTORY = '/home/openflow/logs/'
+DIRECTORY = '/home/caioviel/logs/'
 import uuid
 import time
 
@@ -93,7 +93,7 @@ class NoxAppCollector(DataCollector):
             str_out +='\n\tnew_source\t' + str(event.source)
         
         str_out += '\n\tinstalls\t' + str(routes_to_install)
-        str_out += '\n\tremoves\t' + str(routes_to_remove)
+        str_out += '\n\tremoves\t\t' + str(routes_to_remove)
         str_out += '\n\ttime\t\t' + repr(time)
         self.collect(str_out + '\n')
         
