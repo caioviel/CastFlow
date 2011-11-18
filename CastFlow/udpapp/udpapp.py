@@ -21,10 +21,9 @@ NSECONDS=0.030 #Send Period
 
 MULTICAST_IP = "10.0.2.254"
 MULTICAST_MAC = "ca:fe:ca:fe:ca:fe"
-OUTPUT_DIR = "/home/openflow/logs/"
 
 def parse_packet(packet_data):
-    parsed_data = json.loads(jsonStr)
+    parsed_data = json.loads(packet_data)
     src_uuid = parsed_data['src_uuid']
     packet_number = parsed_data['packet_number']
     timestamp = parsed_data['timestamp']
@@ -45,8 +44,7 @@ def udpserver( IPs, PORT ):
     while True:
         for UDP_IP in IPs:
             message = {'src_uuid' : SRC_UUID, 'packet_number' : str( PKT_LONG ), 'timestamp' : repr( time() )}
-            sock.sendto(json.dumps(self.internal_toJson()), ## SOURCE;PACKET_ID;SENDED
-                         (UDP_IP, UDP_PORT) )
+            sock.sendto(json.dumps(message), (UDP_IP, UDP_PORT) )
         
         PKT_LONG += 1
         sleep( NSECONDS )
@@ -96,8 +94,8 @@ elif sys.argv[1] == "-c":
     interrupted_flow = False
     current_source_id = source_id
     last_packet_number = long(packet_number)
-    last_server_timestamp = double(server_timestamp)
-    last_local_timestamp = double(local_timestamp)
+    last_server_timestamp = float(server_timestamp)
+    last_local_timestamp = float(local_timestamp)
     while True:
         try:
             data, addr = sock.recvfrom( 1024 )   # buffer size is 1024 bytes
@@ -118,10 +116,10 @@ elif sys.argv[1] == "-c":
             # Save the informations
             current_source_id = source_id
             last_packet_number = long(packet_number)
-            last_server_timestamp = double(server_timestamp)
-            last_local_timestamp = double(local_timestamp)
+            last_server_timestamp = float(server_timestamp)
+            last_local_timestamp = float(local_timestamp)
             
-        except timeout:
+        except socket.timeout:
             if not interrupted_flow:
                 interrupted_flow = True
                 dc.collect_interrupted_flow(source_id, packet_number, server_timestamp, local_timestamp)
