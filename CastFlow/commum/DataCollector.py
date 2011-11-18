@@ -4,7 +4,8 @@ Created on Nov 13, 2011
 @author: caioviel
 '''
 
-DIRECTORY = '/tmp/logs/'
+#DIRECTORY = '/tmp/'
+DIRECTORY = ''
 import uuid
 import time
 
@@ -40,39 +41,39 @@ class NoxAppCollector(DataCollector):
     def collect_begin_mst(self, total_nodes, time):
         str_out = 'BEGIN MST:' 
         str_out += '\n\ttotal_nodes\t' + str(total_nodes)
-        str_out += '\n\ttime\t\t' + repr(time)
+        str_out += '\n\ttime\t\t' + str(time)
         self.collect(str_out + '\n')
     
     def collect_end_mst(self, total_nodes, time):
         str_out = 'END MST:' 
         str_out += '\n\ttotal_nodes\t' + str(total_nodes)
-        str_out += '\n\ttime\t\t' + repr(time)
+        str_out += '\n\ttime\t\t' + str(time)
         self.collect(str_out + '\n')
     
     def collect_begin_paths(self, total_nodes, time):
         str_out = 'BEGIN PATHS:' 
         str_out += '\n\ttotal_nodes\t' + str(total_nodes)
-        str_out += '\n\ttime\t\t' + repr(time)
+        str_out += '\n\ttime\t\t' + str(time)
         self.collect(str_out + '\n')
     
     def collect_end_paths(self, total_nodes, time):
         str_out = 'END PATHS:' 
         str_out += '\n\ttotal_nodes\t' + str(total_nodes)
-        str_out += '\n\ttime\t\t' + repr(time)
+        str_out += '\n\ttime\t\t' + str(time)
         self.collect(str_out + '\n')
     
     def collect_begin_installing_flows(self, total_nodes, active_nodes, time):
         str_out = 'BEGIN INSTALLING FLOWS:' 
         str_out += '\n\ttotal_nodes\t' + str(total_nodes)
         str_out += '\n\tactive_nodes\t' + str(active_nodes)
-        str_out += '\n\ttime\t\t' + repr(time)
+        str_out += '\n\ttime\t\t' + str(time)
         self.collect(str_out + '\n')
     
     def collect_end_installing_flows(self, total_nodes, active_nodes, time):
         str_out = 'END INSTALLING FLOWS:' 
         str_out += '\n\ttotal_nodes\t' + str(total_nodes)
         str_out += '\n\tactive_nodes\t' + str(active_nodes)
-        str_out += '\n\ttime\t\t' + repr(time)
+        str_out += '\n\ttime\t\t' + str(time)
         self.collect(str_out + '\n')
     
     def collect_event_effects(self, event, routes_to_install, routes_to_remove, time, ):
@@ -93,60 +94,87 @@ class NoxAppCollector(DataCollector):
             str_out +='\n\tnew_source\t' + str(event.source)
         
         str_out += '\n\tinstalls\t' + str(routes_to_install)
-        str_out += '\n\tremoves\t\t' + str(routes_to_remove)
-        str_out += '\n\ttime\t\t' + repr(time)
+        str_out += '\n\tremoves\t' + str(routes_to_remove)
+        str_out += '\n\ttime\t\t' + str(time)
         self.collect(str_out + '\n')
         
 class UdpAppCollector(DataCollector):
-    def __init__(self, prename ='udpapp'):
+    FIRSTPACKET = 'FIRST_PACKET'
+    INTERRUPTFLOW = 'INTERRUPT_FLOW'
+    SOURCECHANGED = 'SOURCE_CHANGED'
+    RESUMEDFLOW = 'RESUMED_FLOW'
+    PACKETLOST = 'PACKET_LOST'
+
+    def __init__(self, prename ='udpapp', format='human'):
         DataCollector.__init__(self, prename)
+        self.format = format
+        self.csvHeader = 'SOURCE;PACKET_ID;SENDED;RECEIVED;EVENT'
         
     def write_header(self):
-        DataCollector.write_header(self, 'UdpAppCollector')
+        if self.format == 'human':
+            DataCollector.write_header(self, 'UdpAppCollector')
+        elif self.format == 'csv':
+            DataCollector.write_header(self, self.csvHeader)
+        
         
     def collect_my_ip(self, ip):
         self.collect('INSTANCE IP:' + ip + '\n')
         
     def collect_first_package(self, source_id, package_number, serv_time, local_time):
-        str_out = 'FIRST PACKAGE:' 
-        str_out += '\n\tsource_id\t' + source_id
-        str_out += '\n\tpackage_number\t' + package_number
-        str_out += '\n\tserv_time\t' + serv_time
-        str_out += '\n\tlocal_time\t' + local_time
-        self.collect(str_out + '\n')
+        if self.format == 'human':
+            str_out = 'FIRST PACKAGE:' 
+            str_out += '\n\tsource_id\t' + source_id
+            str_out += '\n\tpackage_number\t' + str(package_number)
+            str_out += '\n\tserv_time\t' + str(serv_time)
+            str_out += '\n\tlocal_time\t' + str(local_time)
+            self.collect(str_out + '\n')
+        elif self.format == 'csv':
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ FIRSTPACKET + '\n')
         
     def collect_interrupted_flow(self, source_id, package_number, serv_time, local_time):
-        str_out = 'INTERRUPTED FLOW:' 
-        str_out += '\n\tsource_id\t' + source_id
-        str_out += '\n\tpackage_number\t' + package_number
-        str_out += '\n\tserv_time\t' + serv_time
-        str_out += '\n\tlocal_time\t' + local_time
-        self.collect(str_out + '\n')
+        if self.format == 'human':
+            str_out = 'INTERRUPTED FLOW:' 
+            str_out += '\n\tsource_id\t' + source_id
+            str_out += '\n\tpackage_number\t' + str(package_number)
+            str_out += '\n\tserv_time\t' + str(serv_time)
+            str_out += '\n\tlocal_time\t' + str(local_time)
+            self.collect(str_out + '\n')
+        elif self.format == 'csv':
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ INTERRUPTFLOW + '\n')
         
     def collect_resumed_flow(self, source_id, package_number, serv_time, local_time):
-        str_out = 'RESUMED FLOW:' 
-        str_out += '\n\tsource_id\t' + source_id
-        str_out += '\n\tpackage_number\t' + package_number
-        str_out += '\n\tserv_time\t' + serv_time
-        str_out += '\n\tlocal_time\t' + local_time
-        self.collect(str_out + '\n')
+        if self.format == 'human':
+            str_out = 'RESUMED FLOW:' 
+            str_out += '\n\tsource_id\t' + source_id
+            str_out += '\n\tpackage_number\t' + str(package_number)
+            str_out += '\n\tserv_time\t' + str(serv_time)
+            str_out += '\n\tlocal_time\t' + str(local_time)
+            self.collect(str_out + '\n')
+        elif self.format == 'csv':
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ RESUMEDFLOW + '\n')
         
     def collect_source_changed(self, source_id, package_number, serv_time, local_time):
-        str_out = 'SOURCE CHANGED:' 
-        str_out += '\n\tsource_id\t' + source_id
-        str_out += '\n\tpackage_number\t' + package_number
-        str_out += '\n\tserv_time\t' + serv_time
-        str_out += '\n\tlocal_time\t' + local_time
-        self.collect(str_out + '\n')
+        if self.format == 'human':
+            str_out = 'SOURCE CHANGED:' 
+            str_out += '\n\tsource_id\t' + source_id
+            str_out += '\n\tpackage_number\t' + str(package_number)
+            str_out += '\n\tserv_time\t' + str(serv_time)
+            str_out += '\n\tlocal_time\t' + str(local_time)
+            self.collect(str_out + '\n')
+        elif self.format == 'csv':
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ SOURCECHANGED + '\n')
         
     def collect_package_lost(self, source_id, last_package_number, current_package_number, serv_time, local_time):
-        str_out = 'PACKAGE LOST:'
-        str_out += '\n\tsource_id\t' + source_id
-        str_out += '\n\tlast_number\t' + last_package_number
-        str_out += '\n\tcurrent_number\t' + current_package_number
-        str_out += '\n\tserv_time\t' + serv_time
-        str_out += '\n\tlocal_time\t' + local_time
-        self.collect(str_out + '\n')
+        if self.format == 'human':
+            str_out = 'PACKAGE LOST:'
+            str_out += '\n\tsource_id\t' + source_id
+            str_out += '\n\tlast_number\t' + str(last_package_number)
+            str_out += '\n\tcurrent_number\t' + str(current_package_number)
+            str_out += '\n\tserv_time\t' + str(serv_time)
+            str_out += '\n\tlocal_time\t' + str(local_time)
+            self.collect(str_out + '\n')
+        elif self.format == 'csv':
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ PACKETLOST + '\n')
             
 if __name__ == '__main__':
     '''data = UdpAppCollector()
