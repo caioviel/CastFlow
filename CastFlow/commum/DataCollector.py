@@ -110,42 +110,42 @@ class UdpAppCollector(DataCollector):
     def collect_first_package(self, source_id, package_number, serv_time, local_time):
         str_out = 'FIRST PACKAGE:' 
         str_out += '\n\tsource_id\t' + source_id
-        str_out += '\n\tpackage_number\t' + str(package_number)
-        str_out += '\n\tserv_time\t' + repr(serv_time)
-        str_out += '\n\tlocal_time\t' + repr(local_time)
+        str_out += '\n\tpackage_number\t' + package_number
+        str_out += '\n\tserv_time\t' + serv_time
+        str_out += '\n\tlocal_time\t' + local_time
         self.collect(str_out + '\n')
         
     def collect_interrupted_flow(self, source_id, package_number, serv_time, local_time):
         str_out = 'INTERRUPTED FLOW:' 
         str_out += '\n\tsource_id\t' + source_id
-        str_out += '\n\tpackage_number\t' + str(package_number)
-        str_out += '\n\tserv_time\t' + repr(serv_time)
-        str_out += '\n\tlocal_time\t' + repr(local_time)
+        str_out += '\n\tpackage_number\t' + package_number
+        str_out += '\n\tserv_time\t' + serv_time
+        str_out += '\n\tlocal_time\t' + local_time
         self.collect(str_out + '\n')
         
     def collect_resumed_flow(self, source_id, package_number, serv_time, local_time):
         str_out = 'RESUMED FLOW:' 
         str_out += '\n\tsource_id\t' + source_id
-        str_out += '\n\tpackage_number\t' + str(package_number)
-        str_out += '\n\tserv_time\t' + repr(serv_time)
-        str_out += '\n\tlocal_time\t' + repr(local_time)
+        str_out += '\n\tpackage_number\t' + package_number
+        str_out += '\n\tserv_time\t' + serv_time
+        str_out += '\n\tlocal_time\t' + local_time
         self.collect(str_out + '\n')
         
     def collect_source_changed(self, source_id, package_number, serv_time, local_time):
         str_out = 'SOURCE CHANGED:' 
         str_out += '\n\tsource_id\t' + source_id
-        str_out += '\n\tpackage_number\t' + str(package_number)
-        str_out += '\n\tserv_time\t' + repr(serv_time)
-        str_out += '\n\tlocal_time\t' + repr(local_time)
+        str_out += '\n\tpackage_number\t' + package_number
+        str_out += '\n\tserv_time\t' + serv_time
+        str_out += '\n\tlocal_time\t' + local_time
         self.collect(str_out + '\n')
         
     def collect_package_lost(self, source_id, last_package_number, current_package_number, serv_time, local_time):
         str_out = 'PACKAGE LOST:'
         str_out += '\n\tsource_id\t' + source_id
-        str_out += '\n\tlast_number\t' + str(last_package_number)
-        str_out += '\n\tcurrent_number\t' + str(current_package_number)
-        str_out += '\n\tserv_time\t' + repr(serv_time)
-        str_out += '\n\tlocal_time\t' + repr(local_time)
+        str_out += '\n\tlast_number\t' + last_package_number
+        str_out += '\n\tcurrent_number\t' + current_package_number
+        str_out += '\n\tserv_time\t' + serv_time
+        str_out += '\n\tlocal_time\t' + local_time
         self.collect(str_out + '\n')
             
 if __name__ == '__main__':
