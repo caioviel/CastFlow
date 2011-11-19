@@ -22,6 +22,19 @@ NSECONDS=0.030 #Send Period
 MULTICAST_IP = "10.0.2.254"
 MULTICAST_MAC = "ca:fe:ca:fe:ca:fe"
 
+def help():
+    print " "
+    print "Usage ="
+    print "      Server:"
+    print "              Unicast=    -s CLIENT_IP1 CLIENT_IP2 CLIENT_IPN"
+    print "              Multicast=  -m"
+    print "      Client:"
+    print "              -c HOST_NAME"
+    print "              -c HOST_NAME --format-human"
+    print "              -c HOST_NAME --format-csv"
+    print " "
+    sys.exit()
+
 def parse_packet(packet_data):
     parsed_data = json.loads(packet_data)
     src_uuid = parsed_data['src_uuid']
@@ -55,14 +68,7 @@ def udpserver( IPs, PORT ):
 
 #Arguments should be 2 or more
 if len( sys.argv ) < 2:
-    print " "
-    print "Usage ="
-    print "      Server:"
-    print "              Unicast=    -s CLIENT_IP1 CLIENT_IP2 CLIENT_IPN"
-    print "              Multicast=  -m"
-    print "      Client:"
-    print "              -c HOST_NAME"
-    print " "
+    help()
 
 #Server
 elif sys.argv[1] == "-s":
@@ -72,18 +78,19 @@ elif sys.argv[1] == "-s":
 #Client
 elif sys.argv[1] == "-c":
     HOST_NAME = ""
-    FORMAT = 'human'
-    if len(sys.argv) >= 3:
-        if sys.argv[2] == "--format-csv":
-            FORMAT = 'csv'
-        elif sys.argv[2] == "--format-human":
-            FORMAT = 'human'
-        else:
+    FORMAT_MODE = 'human'
+    if len(sys.argv) >= 4:
+        if sys.argv[3] == "--format-csv":
+            FORMAT_MODE = 'csv'
             HOST_NAME = sys.argv[2]
-            FORMAT = 'human'
-        if len(sys.argv) >= 4:
-            HOST_NAME = sys.argv[4]
-
+        elif sys.argv[3] == "--format-human":
+            FORMAT_MODE = 'human'
+            HOST_NAME = sys.argv[2]
+        else:
+            help()
+    elif len(sys.argv) == 3:
+        HOST_NAME = sys.argv[2]
+    
     UDP_IP = ""
     
     sock = socket.socket( socket.AF_INET,     # Internet
@@ -91,7 +98,7 @@ elif sys.argv[1] == "-c":
     sock.bind( (UDP_IP,UDP_PORT) )
     
     uuidstr = HOST_NAME + '---' + str(uuid.uuid4())
-    dc = UdpAppCollector(prename = 'udpapp-' + HOST_NAME + '---', format = FORMAT)
+    dc = UdpAppCollector(prename = 'udpapp-' + HOST_NAME + '---', format = FORMAT_MODE)
     
     #header = "SOURCE;PACKET_ID;SENDED;RECEIVED;"
     data, addr = sock.recvfrom( 1024 )   # buffer size is 1024 bytes
