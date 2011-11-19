@@ -22,9 +22,9 @@ class DataCollector(object):
         
     def write_header(self, name='DataCollector', header=''):
         if header == '':
-        self.file.write( name + ': ' + self.filename + '\n')
-        str_time = time.strftime('%d/%m/%Y - %H:%M:%S', time.localtime() )
-        self.file.write( str_time + '\n' )
+            self.file.write( name + ': ' + self.filename + '\n')
+            str_time = time.strftime('%d/%m/%Y - %H:%M:%S', time.localtime() )
+            self.file.write( str_time + '\n' )
         else:
             self.file.write( header + '\n' )
 
