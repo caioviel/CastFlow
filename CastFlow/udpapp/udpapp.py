@@ -102,16 +102,21 @@ elif sys.argv[1] == "-c":
     
     #header = "SOURCE;PACKET_ID;SENDED;RECEIVED;"
     data, addr = sock.recvfrom( 1024 )   # buffer size is 1024 bytes
+
     local_timestamp = repr( time() )
     source_id, packet_number, server_timestamp = parse_packet(data)
     print source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+    dc.write_header()
     dc.collect_first_package(source_id, packet_number, server_timestamp, local_timestamp)
+
     sock.settimeout(1) #timeout setted to 1s.
+
     interrupted_flow = False
     current_source_id = source_id
     last_packet_number = long(packet_number)
     last_server_timestamp = float(server_timestamp)
     last_local_timestamp = float(local_timestamp)
+
     while True:
         try:
             data, addr = sock.recvfrom( 1024 )   # buffer size is 1024 bytes

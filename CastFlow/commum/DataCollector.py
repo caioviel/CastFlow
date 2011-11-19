@@ -20,11 +20,15 @@ class DataCollector(object):
         
         self.file = open(self.filename, 'w')
         
-    def write_header(self, name='DataCollector'):
-        self.file.write(name + ': ' + self.filename + '\n')
+    def write_header(self, name='DataCollector', header=''):
+        if header == '':
+        self.file.write( name + ': ' + self.filename + '\n')
         str_time = time.strftime('%d/%m/%Y - %H:%M:%S', time.localtime() )
         self.file.write( str_time + '\n' )
-        self.file.flush()
+        else:
+            self.file.write( header + '\n' )
+
+    self.file.flush()
             
     def collect(self, str_data):
         self.file.write(str_data + "\n")
@@ -98,22 +102,22 @@ class NoxAppCollector(DataCollector):
         self.collect(str_out + '\n')
         
 class UdpAppCollector(DataCollector):
-    FIRSTPACKET = 'FIRST_PACKET'
-    INTERRUPTFLOW = 'INTERRUPT_FLOW'
-    SOURCECHANGED = 'SOURCE_CHANGED'
-    RESUMEDFLOW = 'RESUMED_FLOW'
-    PACKETLOST = 'PACKET_LOST'
-
     def __init__(self, prename ='udpapp', format='human'):
         DataCollector.__init__(self, prename)
         self.format = format
         self.csvHeader = 'SOURCE;PACKET_ID;SENDED;RECEIVED;EVENT'
+
+        self.FIRSTPACKET = 'FIRST_PACKET'
+        self.INTERRUPTFLOW = 'INTERRUPT_FLOW'
+        self.SOURCECHANGED = 'SOURCE_CHANGED'
+        self.RESUMEDFLOW = 'RESUMED_FLOW'
+        self.PACKETLOST = 'PACKET_LOST'
         
     def write_header(self):
         if self.format == 'human':
-            DataCollector.write_header(self, 'UdpAppCollector')
+            DataCollector.write_header(self, name ='UdpAppCollector')
         elif self.format == 'csv':
-            DataCollector.write_header(self, self.csvHeader)
+            DataCollector.write_header(self, header =self.csvHeader)
         
         
     def collect_my_ip(self, ip):
@@ -128,7 +132,7 @@ class UdpAppCollector(DataCollector):
             str_out += '\n\tlocal_time\t' + str(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
-            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ FIRSTPACKET + '\n')
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ self.FIRSTPACKET + '\n')
         
     def collect_interrupted_flow(self, source_id, package_number, serv_time, local_time):
         if self.format == 'human':
@@ -139,7 +143,7 @@ class UdpAppCollector(DataCollector):
             str_out += '\n\tlocal_time\t' + str(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
-            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ INTERRUPTFLOW + '\n')
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ self.INTERRUPTFLOW + '\n')
         
     def collect_resumed_flow(self, source_id, package_number, serv_time, local_time):
         if self.format == 'human':
@@ -150,7 +154,7 @@ class UdpAppCollector(DataCollector):
             str_out += '\n\tlocal_time\t' + str(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
-            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ RESUMEDFLOW + '\n')
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ self.RESUMEDFLOW + '\n')
         
     def collect_source_changed(self, source_id, package_number, serv_time, local_time):
         if self.format == 'human':
@@ -161,7 +165,7 @@ class UdpAppCollector(DataCollector):
             str_out += '\n\tlocal_time\t' + str(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
-            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ SOURCECHANGED + '\n')
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ self.SOURCECHANGED + '\n')
         
     def collect_package_lost(self, source_id, last_package_number, current_package_number, serv_time, local_time):
         if self.format == 'human':
@@ -173,7 +177,7 @@ class UdpAppCollector(DataCollector):
             str_out += '\n\tlocal_time\t' + str(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
-            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ PACKETLOST + '\n')
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ self.PACKETLOST + '\n')
             
 if __name__ == '__main__':
     '''data = UdpAppCollector()
