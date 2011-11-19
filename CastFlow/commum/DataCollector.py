@@ -28,7 +28,7 @@ class DataCollector(object):
         else:
             self.file.write( header + '\n' )
 
-    self.file.flush()
+        self.file.flush()
             
     def collect(self, str_data):
         self.file.write(str_data + "\n")
