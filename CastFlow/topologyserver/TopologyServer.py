@@ -72,17 +72,30 @@ class TopologyServer(InternalInterface):
         self.topologyManager.updateHosts(request.topology.hosts)
         
     def entryEvent(self, request):
-        event = self.topologyManager.forceEntryEvent(request.hosts)
+        event = None
+        if request.ACTION.ENTRY_EVENT:
+            event = self.topologyManager.generateEntryEvent()
+        else:
+            event = self.topologyManager.forceEntryEvent(request.hosts)
         if event != None:
             self.notifyEvent(event)
     
     def exitEvent(self, request):
-        event = self.topologyManager.forceExitEvent(request.hosts)
+        event = None
+        if request.ACTION.EXIT_EVENT:
+            event = self.topologyManager.generateExitEvent()
+        else:
+            event = self.topologyManager.forceExitEvent(request.hosts)
+            
         if event != None:
             self.notifyEvent(event)
             
     def changeSource(self, request):
-        event = self.topologyManager.forceChangeSource(request.source)
+        event = None
+        if request.ACTION.ENTRY_EVENT:
+            pass
+        else:
+            event = self.topologyManager.forceChangeSource(request.source)
         if event != None:
             self.notifyEvent(event)
     

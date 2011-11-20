@@ -64,6 +64,18 @@ class ClientHandler(threading.Thread):
                     print '\tMessage request(changeSource) received from client', self.address
                     self.request_change_source(request)
                 
+                elif request.action == request.ACTION.ENTRY_EVENT:
+                    print '\tMessage request(entryEvent) received from client', self.address
+                    self.request_entry_event(request)
+                    
+                elif request.action == request.ACTION.EXIT_EVENT:
+                    print '\tMessage request(exitEvent) received from client', self.address
+                    self.request_exit_event(request)
+                    
+                elif request.action == request.ACTION.SOURCE_EVENT:
+                    print '\tMessage request(sourceEvent) received from client', self.address
+                    self.request_source_event(request)
+                
                 else:
                     return 'none'
                 
@@ -109,6 +121,16 @@ class ClientHandler(threading.Thread):
     def request_change_source(self, request):
         self.topologyServer.addEventListeners(self)
         self.topologyServer.changeSource(request)
+        
+    def request_entry_event(self, request):
+        self.topologyServer.entryEvent(request)
+    
+    def request_exit_event(self, request):
+        self.topologyServer.exitEvent(request)
+    
+    def request_source_event(self, request):
+        self.topologyServer.changeSource(request)
+        
         
     def notify_client(self, notification):
         jsonMessage = notification.toJson()

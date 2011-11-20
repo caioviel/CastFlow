@@ -206,7 +206,8 @@ elif sys.argv[1] == "-c":
 
     local_timestamp = repr( time.time() )
     source_id, packet_number, server_timestamp = parse_packet(data)
-    print source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+    print 'First Packet Received!'
+    #print source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
     dc.write_header()
     dc.collect_first_package(source_id, packet_number, server_timestamp, local_timestamp)
 
@@ -228,12 +229,14 @@ elif sys.argv[1] == "-c":
                 print 'Resumed Flow!'
                 dc.collect_resumed_flow(source_id, packet_number, server_timestamp, local_timestamp)
             
-            print source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+            #print source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
             if current_source_id != source_id:
                 dc.collect_source_changed(source_id, packet_number, server_timestamp, local_timestamp)
+                print 'Source Changed!'
             elif last_packet_number - long(packet_number) > 1:
                 dc.collect_package_lost(source_id, str(last_packet_number), 
                                         packet_number, server_timestamp, local_timestamp)
+                print 'Packet Lost!'
             
             # Save the informations
             current_source_id = source_id

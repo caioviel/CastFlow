@@ -8,6 +8,7 @@ from commum.Model import *
 from commum.util import *
 from noxapp_exp.MSTParser import MSTParser
 from commum.DataCollector import NoxAppCollector
+from time import sleep
 
 import threading
 import time
@@ -21,6 +22,7 @@ class InstallPath:
         self.needRewrite = False
         self.dst_mac = ''
         self.dst_ip = ''
+        self.samples_number = -1
         
     def addOutputPort(self, portnumber):
         self.outputPorts.append(portnumber)
@@ -376,8 +378,28 @@ class InstallationManager(threading.Thread):
         request.action = request.ACTION.REGISTER_FOR_EVENTS
         jsonMessage = request.toJson()
         self.socket.send( jsonMessage )
+        sleep(1)
+        last_entry = False
+        samples_collected = 0
         
         while True:
+            if self.samples_number != -1:
+                if samples_collected < self.samples_number:
+                        request = Request()
+                        request.id = self.__next_req_number__()
+                        if last_entry:
+                            request.action = request.ACTION.EXIT_EVENT
+                            last_entry = False
+                        else:
+                            request.action = request.ACTION.ENTRY_EVENT
+                            last_entry = True
+                            
+                        jsonMessage = request.toJson()
+                        self.socket.send( jsonMessage )
+                        samples_collected += 1
+                else:
+                    sys.exit()
+            
             jsonEvent = self.socket.recv()
             event = EventFactory().decodeJson( jsonEvent )
             if event.type == "entry":
@@ -536,6 +558,7 @@ class InstallationManager(threading.Thread):
         
 if __name__ == '__main__':
     im = InstallationManager()
+    im.samples_number = 10
     allpaths = im.get_all_paths()
     print 'Total Paths: ', len(allpaths)
     for path in allpaths:

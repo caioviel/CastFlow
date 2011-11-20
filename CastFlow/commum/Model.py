@@ -328,7 +328,9 @@ class Request:
                   'GET_GROUP', 'REGISTER_FOR_EVENTS', 
                   'WAIT_START', 'START', 'NONE', 
                   'UPDATE_TOPOLOGY', 'ENTRY_GROUP', 
-                  'EXIT_GROUP', 'CHANGE_SOURCE')
+                  'EXIT_GROUP', 'CHANGE_SOURCE',
+                  'ENTRY_EVENT', 'EXIT_EVENT',
+                  'SOURCE_EVENT')
     
     def __init__(self, myid = -1, action = ACTION.NONE):
         self.id = myid
@@ -373,6 +375,12 @@ class Request:
             return 'entryGroup'
         elif action == self.ACTION.CHANGE_SOURCE:
             return 'changeSource'
+        elif action == self.ACTION.ENTRY_EVENT:
+            return 'entryEvent'
+        elif action == self.ACTION.EXIT_EVENT:
+            return 'exitEvent'
+        elif action == self.ACTION.SOURCE_EVENT:
+            return 'sourceEvent'
         else:
             return 'none'
     
@@ -397,6 +405,12 @@ class Request:
             return self.ACTION.ENTRY_GROUP
         elif actionStr == 'changeSource':
             return self.ACTION.CHANGE_SOURCE
+        elif actionStr == 'changeSource':
+            return self.ACTION.ENTRY_EVENT
+        elif actionStr == 'exitEvent':
+            return self.ACTION.EXIT_EVENT
+        elif actionStr == 'sourceEvent':
+            return self.ACTION.SOURCE_EVENT
         else:
             return self.ACTION.NONE
         
