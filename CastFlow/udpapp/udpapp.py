@@ -48,7 +48,7 @@ class DataCollector(object):
         self.file.flush()
 
 class UdpAppCollector(DataCollector):
-    def __init__(self, prename ='udpapp', format='human'):
+    def __init__(self, prename ='udpapp', format='csv'):
         DataCollector.__init__(self, prename)
         self.format = format
         self.csvHeader = 'SOURCE;PACKET_ID;SENDED;RECEIVED;EVENT'
