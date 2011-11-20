@@ -12,8 +12,113 @@ import sys
 import socket
 import json
 import uuid
-from time import time, sleep
-from commum.DataCollector import UdpAppCollector
+from time import sleep
+import time
+import datetime
+
+DIRECTORY = '/tmp/logs/'
+FIRSTPACKET = 'FIRST_PACKET'
+INTERRUPTFLOW = 'INTERRUPT_FLOW'
+SOURCECHANGED = 'SOURCE_CHANGED'
+RESUMEDFLOW = 'RESUMED_FLOW'
+PACKETLOST = 'PACKET_LOST'
+
+class DataCollector(object):
+    def __init__(self, prename = ''):
+        uuidstr = str(uuid.uuid4())
+        if prename == '':
+            self.filename = DIRECTORY + uuidstr + '.txt'
+        else:
+            self.filename = DIRECTORY + prename + '-' + uuidstr + '.txt'
+        
+        self.file = open(self.filename, 'w')
+        
+    def write_header(self, name='DataCollector', header=''):
+        if header == '':
+            self.file.write( name + ': ' + self.filename + '\n')
+            str_time = time.strftime('%d/%m/%Y  %H:%M:%S', time.localtime() )
+            self.file.write( str_time + '\n' )
+        else:
+            self.file.write( header + '\n' )
+
+        self.file.flush()
+            
+    def collect(self, str_data):
+        self.file.write(str_data + "\n")
+        self.file.flush()
+
+class UdpAppCollector(DataCollector):
+    def __init__(self, prename ='udpapp', format='human'):
+        DataCollector.__init__(self, prename)
+        self.format = format
+        self.csvHeader = 'SOURCE;PACKET_ID;SENDED;RECEIVED;EVENT'
+        
+    def write_header(self):
+        if self.format == 'human':
+            DataCollector.write_header(self, name ='UdpAppCollector')
+        elif self.format == 'csv':
+            DataCollector.write_header(self, header =self.csvHeader)
+        
+        
+    def collect_my_ip(self, ip):
+        self.collect('INSTANCE IP:' + ip + '\n')
+        
+    def collect_first_package(self, source_id, package_number, serv_time, local_time):
+        if self.format == 'human':
+            str_out = 'FIRST PACKAGE:' 
+            str_out += '\n\tsource_id\t' + source_id
+            str_out += '\n\tpackage_number\t' + str(package_number)
+            str_out += '\n\tserv_time\t' + str(serv_time)
+            str_out += '\n\tlocal_time\t' + str(local_time)
+            self.collect(str_out + '\n')
+        elif self.format == 'csv':
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ FIRSTPACKET + '\n')
+        
+    def collect_interrupted_flow(self, source_id, package_number, serv_time, local_time):
+        if self.format == 'human':
+            str_out = 'INTERRUPTED FLOW:' 
+            str_out += '\n\tsource_id\t' + source_id
+            str_out += '\n\tpackage_number\t' + str(package_number)
+            str_out += '\n\tserv_time\t' + str(serv_time)
+            str_out += '\n\tlocal_time\t' + str(local_time)
+            self.collect(str_out + '\n')
+        elif self.format == 'csv':
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ INTERRUPTFLOW + '\n')
+        
+    def collect_resumed_flow(self, source_id, package_number, serv_time, local_time):
+        if self.format == 'human':
+            str_out = 'RESUMED FLOW:' 
+            str_out += '\n\tsource_id\t' + source_id
+            str_out += '\n\tpackage_number\t' + str(package_number)
+            str_out += '\n\tserv_time\t' + str(serv_time)
+            str_out += '\n\tlocal_time\t' + str(local_time)
+            self.collect(str_out + '\n')
+        elif self.format == 'csv':
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ RESUMEDFLOW + '\n')
+        
+    def collect_source_changed(self, source_id, package_number, serv_time, local_time):
+        if self.format == 'human':
+            str_out = 'SOURCE CHANGED:' 
+            str_out += '\n\tsource_id\t' + source_id
+            str_out += '\n\tpackage_number\t' + str(package_number)
+            str_out += '\n\tserv_time\t' + str(serv_time)
+            str_out += '\n\tlocal_time\t' + str(local_time)
+            self.collect(str_out + '\n')
+        elif self.format == 'csv':
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ SOURCECHANGED + '\n')
+        
+    def collect_package_lost(self, source_id, last_package_number, current_package_number, serv_time, local_time):
+        if self.format == 'human':
+            str_out = 'PACKAGE LOST:'
+            str_out += '\n\tsource_id\t' + source_id
+            str_out += '\n\tlast_number\t' + str(last_package_number)
+            str_out += '\n\tcurrent_number\t' + str(current_package_number)
+            str_out += '\n\tserv_time\t' + str(serv_time)
+            str_out += '\n\tlocal_time\t' + str(local_time)
+            self.collect(str_out + '\n')
+        elif self.format == 'csv':
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ PACKETLOST + '\n')
+
 
 UDP_PORT=8885 #Port Listening/Sending
 
@@ -56,15 +161,12 @@ def udpserver( IPs, PORT ):
     #Send each NSECONDS for each client
     while True:
         for UDP_IP in IPs:
-            message = {'src_uuid' : SRC_UUID, 'packet_number' : str( PKT_LONG ), 'timestamp' : repr( time() )}
+            message = {'src_uuid' : SRC_UUID, 'packet_number' : str( PKT_LONG ), 'timestamp' : repr( time.time() )}
             sock.sendto(json.dumps(message), (UDP_IP, UDP_PORT) )
         
         PKT_LONG += 1
         sleep( NSECONDS )
 
-
-#Register the multicast ip and mac on the arp table.
-#os.system('arp -s ' + MULTICAST_IP + ' ' + MULTICAST_MAC)
 
 #Arguments should be 2 or more
 if len( sys.argv ) < 2:
@@ -96,14 +198,13 @@ elif sys.argv[1] == "-c":
     sock = socket.socket( socket.AF_INET,     # Internet
                           socket.SOCK_DGRAM ) # UDP
     sock.bind( (UDP_IP,UDP_PORT) )
-    
+
     uuidstr = HOST_NAME + '---' + str(uuid.uuid4())
     dc = UdpAppCollector(prename = 'udpapp-' + HOST_NAME + '---', format = FORMAT_MODE)
-    
-    #header = "SOURCE;PACKET_ID;SENDED;RECEIVED;"
+
     data, addr = sock.recvfrom( 1024 )   # buffer size is 1024 bytes
 
-    local_timestamp = repr( time() )
+    local_timestamp = repr( time.time() )
     source_id, packet_number, server_timestamp = parse_packet(data)
     print source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
     dc.write_header()
@@ -120,7 +221,7 @@ elif sys.argv[1] == "-c":
     while True:
         try:
             data, addr = sock.recvfrom( 1024 )   # buffer size is 1024 bytes
-            local_timestamp = repr( time() )
+            local_timestamp = repr( time.time() )
             source_id, packet_number, server_timestamp = parse_packet(data)
             if interrupted_flow:
                 interrupted_flow = False

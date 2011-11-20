@@ -53,7 +53,7 @@ def mnScript():
     src = net.nameToNode[ "h" + str(group.source) ]
     print "*** Setup CA:FE ARP in source"
     src.cmd("arp -s 10.0.2.254 ca:fe:ca:fe:ca:fe")
-    print "*** Start udpapp in source manually ;)"
+    print "*** Start udpapp in source( " + src.name + " ) manually ;)"
     #src.cmd("udpapp -m &")
     
     for host in group.hosts:
@@ -62,7 +62,7 @@ def mnScript():
         h.cmd("arp -s 10.0.2.254 ca:fe:ca:fe:ca:fe")
         print "*** Starting udpapp in " + h.name
         h.cmd("udpapp -c "  + h.name  + " &")
-        sleep( 1 )
+        #sleep( 1 )
 
     print "*** Starting CLI ***"
     CLI( net )

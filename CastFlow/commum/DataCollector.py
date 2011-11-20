@@ -4,9 +4,15 @@ Created on Nov 13, 2011
 @author: caioviel
 '''
 
-DIRECTORY = '/tmp/logs/'
 import uuid
 import time
+
+DIRECTORY = '/tmp/logs/'
+FIRSTPACKET = 'FIRST_PACKET'
+INTERRUPTFLOW = 'INTERRUPT_FLOW'
+SOURCECHANGED = 'SOURCE_CHANGED'
+RESUMEDFLOW = 'RESUMED_FLOW'
+PACKETLOST = 'PACKET_LOST'
 
 from commum.Model import Event, Host
 
@@ -23,7 +29,7 @@ class DataCollector(object):
     def write_header(self, name='DataCollector', header=''):
         if header == '':
             self.file.write( name + ': ' + self.filename + '\n')
-            str_time = time.strftime('%d/%m/%Y - %H:%M:%S', time.localtime() )
+            str_time = time.strftime('%d/%m/%Y  %H:%M:%S', time.localtime() )
             self.file.write( str_time + '\n' )
         else:
             self.file.write( header + '\n' )
@@ -33,7 +39,7 @@ class DataCollector(object):
     def collect(self, str_data):
         self.file.write(str_data + "\n")
         self.file.flush()
-        
+
 class NoxAppCollector(DataCollector):
     def __init__(self, prename='noxapp'):
         DataCollector.__init__(self, prename)
@@ -100,18 +106,12 @@ class NoxAppCollector(DataCollector):
         str_out += '\n\tremoves\t' + str(routes_to_remove)
         str_out += '\n\ttime\t\t' + str(time)
         self.collect(str_out + '\n')
-        
+
 class UdpAppCollector(DataCollector):
     def __init__(self, prename ='udpapp', format='human'):
         DataCollector.__init__(self, prename)
         self.format = format
         self.csvHeader = 'SOURCE;PACKET_ID;SENDED;RECEIVED;EVENT'
-
-        self.FIRSTPACKET = 'FIRST_PACKET'
-        self.INTERRUPTFLOW = 'INTERRUPT_FLOW'
-        self.SOURCECHANGED = 'SOURCE_CHANGED'
-        self.RESUMEDFLOW = 'RESUMED_FLOW'
-        self.PACKETLOST = 'PACKET_LOST'
         
     def write_header(self):
         if self.format == 'human':
@@ -132,7 +132,7 @@ class UdpAppCollector(DataCollector):
             str_out += '\n\tlocal_time\t' + str(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
-            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ self.FIRSTPACKET + '\n')
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ FIRSTPACKET + '\n')
         
     def collect_interrupted_flow(self, source_id, package_number, serv_time, local_time):
         if self.format == 'human':
@@ -143,7 +143,7 @@ class UdpAppCollector(DataCollector):
             str_out += '\n\tlocal_time\t' + str(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
-            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ self.INTERRUPTFLOW + '\n')
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ INTERRUPTFLOW + '\n')
         
     def collect_resumed_flow(self, source_id, package_number, serv_time, local_time):
         if self.format == 'human':
@@ -154,7 +154,7 @@ class UdpAppCollector(DataCollector):
             str_out += '\n\tlocal_time\t' + str(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
-            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ self.RESUMEDFLOW + '\n')
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ RESUMEDFLOW + '\n')
         
     def collect_source_changed(self, source_id, package_number, serv_time, local_time):
         if self.format == 'human':
@@ -165,7 +165,7 @@ class UdpAppCollector(DataCollector):
             str_out += '\n\tlocal_time\t' + str(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
-            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ self.SOURCECHANGED + '\n')
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ SOURCECHANGED + '\n')
         
     def collect_package_lost(self, source_id, last_package_number, current_package_number, serv_time, local_time):
         if self.format == 'human':
@@ -177,17 +177,18 @@ class UdpAppCollector(DataCollector):
             str_out += '\n\tlocal_time\t' + str(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
-            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ self.PACKETLOST + '\n')
-            
+            self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ PACKETLOST + '\n')
+
+'''            
 if __name__ == '__main__':
-    '''data = UdpAppCollector()
+    data = UdpAppCollector()
     data.write_header()
     data.collect_my_ip('10:0:0:51')
     data.collect_first_package('fonte1', 1, 121321, 1231213321)
     data.collect_package_lost('fonte1', 1, 3, 45465465, 45646546)
     data.collect_interrupted_flow('fonte1', 4, 213213, 313123123)
     data.collect_resumed_flow('fonte1', 10, 2312321, 321312312)
-    data.collect_source_changed('fonte2', 1, 121212, 2121212)'''
+    data.collect_source_changed('fonte2', 1, 121212, 2121212)
     
     data = NoxAppCollector()
     data.write_header()
@@ -219,4 +220,4 @@ if __name__ == '__main__':
     data.collect_event_effects(event, 7, 5, 12121121)
     data.collect_begin_installing_flows(50, 20, 12313213)
     data.collect_end_installing_flows(50, 20, 121231321)
-    
+'''    
