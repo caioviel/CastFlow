@@ -68,8 +68,8 @@ class UdpAppCollector(DataCollector):
             str_out = 'FIRST PACKAGE:' 
             str_out += '\n\tsource_id\t' + source_id
             str_out += '\n\tpackage_number\t' + str(package_number)
-            str_out += '\n\tserv_time\t' + str(serv_time)
-            str_out += '\n\tlocal_time\t' + str(local_time)
+            str_out += '\n\tserv_time\t' + repr(serv_time)
+            str_out += '\n\tlocal_time\t' + repr(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
             self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ FIRSTPACKET + '\n')
@@ -79,8 +79,8 @@ class UdpAppCollector(DataCollector):
             str_out = 'INTERRUPTED FLOW:' 
             str_out += '\n\tsource_id\t' + source_id
             str_out += '\n\tpackage_number\t' + str(package_number)
-            str_out += '\n\tserv_time\t' + str(serv_time)
-            str_out += '\n\tlocal_time\t' + str(local_time)
+            str_out += '\n\tserv_time\t' + repr(serv_time)
+            str_out += '\n\tlocal_time\t' + repr(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
             self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ INTERRUPTFLOW + '\n')
@@ -90,8 +90,8 @@ class UdpAppCollector(DataCollector):
             str_out = 'RESUMED FLOW:' 
             str_out += '\n\tsource_id\t' + source_id
             str_out += '\n\tpackage_number\t' + str(package_number)
-            str_out += '\n\tserv_time\t' + str(serv_time)
-            str_out += '\n\tlocal_time\t' + str(local_time)
+            str_out += '\n\tserv_time\t' + repr(serv_time)
+            str_out += '\n\tlocal_time\t' + repr(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
             self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ RESUMEDFLOW + '\n')
@@ -101,8 +101,8 @@ class UdpAppCollector(DataCollector):
             str_out = 'SOURCE CHANGED:' 
             str_out += '\n\tsource_id\t' + source_id
             str_out += '\n\tpackage_number\t' + str(package_number)
-            str_out += '\n\tserv_time\t' + str(serv_time)
-            str_out += '\n\tlocal_time\t' + str(local_time)
+            str_out += '\n\tserv_time\t' + repr(serv_time)
+            str_out += '\n\tlocal_time\t' + repr(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
             self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ SOURCECHANGED + '\n')
@@ -113,8 +113,8 @@ class UdpAppCollector(DataCollector):
             str_out += '\n\tsource_id\t' + source_id
             str_out += '\n\tlast_number\t' + str(last_package_number)
             str_out += '\n\tcurrent_number\t' + str(current_package_number)
-            str_out += '\n\tserv_time\t' + str(serv_time)
-            str_out += '\n\tlocal_time\t' + str(local_time)
+            str_out += '\n\tserv_time\t' + repr(serv_time)
+            str_out += '\n\tlocal_time\t' + repr(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
             self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ PACKETLOST + '\n')
@@ -180,7 +180,7 @@ elif sys.argv[1] == "-s":
 #Client
 elif sys.argv[1] == "-c":
     HOST_NAME = ""
-    FORMAT_MODE = 'human'
+    FORMAT_MODE = 'csv'
     if len(sys.argv) >= 4:
         if sys.argv[3] == "--format-csv":
             FORMAT_MODE = 'csv'

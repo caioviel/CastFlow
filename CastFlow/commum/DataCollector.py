@@ -49,33 +49,33 @@ class NoxAppCollector(DataCollector):
         
     def collect_begin_mst(self, total_nodes, time):
         str_out = 'BEGIN MST:' 
-        str_out += '\n\ttotal_nodes\t' + str(total_nodes)
-        str_out += '\n\ttime\t\t' + str(time)
+        str_out += '\n\ttotal_nodes\t' + repr(total_nodes)
+        str_out += '\n\ttime\t\t' + strrepr(time)
         self.collect(str_out + '\n')
     
     def collect_end_mst(self, total_nodes, time):
         str_out = 'END MST:' 
-        str_out += '\n\ttotal_nodes\t' + str(total_nodes)
-        str_out += '\n\ttime\t\t' + str(time)
+        str_out += '\n\ttotal_nodes\t' + repr(total_nodes)
+        str_out += '\n\ttime\t\t' + repr(time)
         self.collect(str_out + '\n')
     
     def collect_begin_paths(self, total_nodes, time):
         str_out = 'BEGIN PATHS:' 
-        str_out += '\n\ttotal_nodes\t' + str(total_nodes)
-        str_out += '\n\ttime\t\t' + str(time)
+        str_out += '\n\ttotal_nodes\t' + repr(total_nodes)
+        str_out += '\n\ttime\t\t' + repr(time)
         self.collect(str_out + '\n')
     
     def collect_end_paths(self, total_nodes, time):
         str_out = 'END PATHS:' 
-        str_out += '\n\ttotal_nodes\t' + str(total_nodes)
-        str_out += '\n\ttime\t\t' + str(time)
+        str_out += '\n\ttotal_nodes\t' + repr(total_nodes)
+        str_out += '\n\ttime\t\t' + repr(time)
         self.collect(str_out + '\n')
     
     def collect_begin_installing_flows(self, total_nodes, active_nodes, time):
         str_out = 'BEGIN INSTALLING FLOWS:' 
         str_out += '\n\ttotal_nodes\t' + str(total_nodes)
-        str_out += '\n\tactive_nodes\t' + str(active_nodes)
-        str_out += '\n\ttime\t\t' + str(time)
+        str_out += '\n\tactive_nodes\t' + repr(active_nodes)
+        str_out += '\n\ttime\t\t' + repr(time)
         self.collect(str_out + '\n')
     
     def collect_end_installing_flows(self, total_nodes, active_nodes, time):
@@ -103,8 +103,8 @@ class NoxAppCollector(DataCollector):
             str_out +='\n\tnew_source\t' + str(event.source)
         
         str_out += '\n\tinstalls\t' + str(routes_to_install)
-        str_out += '\n\tremoves\t' + str(routes_to_remove)
-        str_out += '\n\ttime\t\t' + str(time)
+        str_out += '\n\tremoves\t' + repr(routes_to_remove)
+        str_out += '\n\ttime\t\t' + repr(time)
         self.collect(str_out + '\n')
 
 class UdpAppCollector(DataCollector):
@@ -128,8 +128,8 @@ class UdpAppCollector(DataCollector):
             str_out = 'FIRST PACKAGE:' 
             str_out += '\n\tsource_id\t' + source_id
             str_out += '\n\tpackage_number\t' + str(package_number)
-            str_out += '\n\tserv_time\t' + str(serv_time)
-            str_out += '\n\tlocal_time\t' + str(local_time)
+            str_out += '\n\tserv_time\t' + repr(serv_time)
+            str_out += '\n\tlocal_time\t' + repr(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
             self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ FIRSTPACKET + '\n')
@@ -139,8 +139,8 @@ class UdpAppCollector(DataCollector):
             str_out = 'INTERRUPTED FLOW:' 
             str_out += '\n\tsource_id\t' + source_id
             str_out += '\n\tpackage_number\t' + str(package_number)
-            str_out += '\n\tserv_time\t' + str(serv_time)
-            str_out += '\n\tlocal_time\t' + str(local_time)
+            str_out += '\n\tserv_time\t' + repr(serv_time)
+            str_out += '\n\tlocal_time\t' + repr(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
             self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ INTERRUPTFLOW + '\n')
@@ -150,8 +150,8 @@ class UdpAppCollector(DataCollector):
             str_out = 'RESUMED FLOW:' 
             str_out += '\n\tsource_id\t' + source_id
             str_out += '\n\tpackage_number\t' + str(package_number)
-            str_out += '\n\tserv_time\t' + str(serv_time)
-            str_out += '\n\tlocal_time\t' + str(local_time)
+            str_out += '\n\tserv_time\t' + repr(serv_time)
+            str_out += '\n\tlocal_time\t' + repr(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
             self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ RESUMEDFLOW + '\n')
@@ -161,8 +161,8 @@ class UdpAppCollector(DataCollector):
             str_out = 'SOURCE CHANGED:' 
             str_out += '\n\tsource_id\t' + source_id
             str_out += '\n\tpackage_number\t' + str(package_number)
-            str_out += '\n\tserv_time\t' + str(serv_time)
-            str_out += '\n\tlocal_time\t' + str(local_time)
+            str_out += '\n\tserv_time\t' + repr(serv_time)
+            str_out += '\n\tlocal_time\t' + repr(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
             self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ SOURCECHANGED + '\n')
@@ -173,8 +173,8 @@ class UdpAppCollector(DataCollector):
             str_out += '\n\tsource_id\t' + source_id
             str_out += '\n\tlast_number\t' + str(last_package_number)
             str_out += '\n\tcurrent_number\t' + str(current_package_number)
-            str_out += '\n\tserv_time\t' + str(serv_time)
-            str_out += '\n\tlocal_time\t' + str(local_time)
+            str_out += '\n\tserv_time\t' + repr(serv_time)
+            str_out += '\n\tlocal_time\t' + repr(local_time)
             self.collect(str_out + '\n')
         elif self.format == 'csv':
             self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ PACKETLOST + '\n')
