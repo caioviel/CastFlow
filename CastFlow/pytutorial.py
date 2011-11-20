@@ -19,7 +19,7 @@ class pytutorial(Component):
 
     def install_routes(self):
         #print '\n\n\n\n\n'        
-        #print '************ INSTALLING ROUTES ****************'
+        print '************ INSTALLING ROUTES ****************'
         installs = self.im.installs_to_do
 
         for install in installs:
@@ -38,15 +38,17 @@ class pytutorial(Component):
 
             self.install_datapath_flow(install.routerId, attrs, 3600, 3600, actions, None, openflow.OFP_DEFAULT_PRIORITY, install.inputPort, None)
             
-        #print '********** REMOVING OBSOLUTE ROUTES ***********'
+        print '********** REMOVING OBSOLUTE ROUTES ***********'
         removes = self.im.installs_to_remove
-        #for install in removes:
+        for install in removes:
             #print 'Removing: ', install
             attrs = {}
             attrs[core.IN_PORT] = install.inputPort
             self.im.collect_begin_installs()
             self.delete_datapath_flow(install.routerId, attrs)
             self.im.collect_end_installs()
+            
+        print '********** FINISHED INSTALLATION ***********'
 
     def __init__(self, ctxt):
         Component.__init__(self, ctxt)

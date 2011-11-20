@@ -45,7 +45,7 @@ class DataCollector(object):
             
     def collect(self, str_data):
         self.file.write(str_data + "\n")
-        self.file.flush()
+        #self.file.flush()
 
 class UdpAppCollector(DataCollector):
     def __init__(self, prename ='udpapp', format='csv'):
@@ -73,6 +73,8 @@ class UdpAppCollector(DataCollector):
             self.collect(str_out + '\n')
         elif self.format == 'csv':
             self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ FIRSTPACKET + '\n')
+            
+        self.file.flush()
         
     def collect_interrupted_flow(self, source_id, package_number, serv_time, local_time):
         if self.format == 'human':
@@ -84,6 +86,8 @@ class UdpAppCollector(DataCollector):
             self.collect(str_out + '\n')
         elif self.format == 'csv':
             self.collect(source_id +';'+ package_number +';'+ serv_time +';'+ local_time +';'+ INTERRUPTFLOW + '\n')
+            
+        self.file.flush()
         
     def collect_resumed_flow(self, source_id, package_number, serv_time, local_time):
         if self.format == 'human':
@@ -225,17 +229,17 @@ elif sys.argv[1] == "-c":
             source_id, packet_number, server_timestamp = parse_packet(data)
             if interrupted_flow:
                 interrupted_flow = False
-                print 'Resumed Flow; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
-                #dc.collect_resumed_flow(source_id, packet_number, server_timestamp, local_timestamp)
+                #print 'Resumed Flow; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+                dc.collect_resumed_flow(source_id, packet_number, server_timestamp, local_timestamp)
             
             #print source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
             if current_source_id != source_id:
-                #dc.collect_source_changed(source_id, packet_number, server_timestamp, local_timestamp)
-                print 'Source Changed; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+                dc.collect_source_changed(source_id, packet_number, server_timestamp, local_timestamp)
+                #print 'Source Changed; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
             elif last_packet_number - long(packet_number) > 1:
-                #dc.collect_package_lost(source_id, str(last_packet_number), 
-                                        #packet_number, server_timestamp, local_timestamp)
-                print 'Packet Lost; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+                dc.collect_package_lost(source_id, str(last_packet_number), 
+                                        packet_number, server_timestamp, local_timestamp)
+                #print 'Packet Lost; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
             
             # Save the informations
             current_source_id = source_id
@@ -246,8 +250,8 @@ elif sys.argv[1] == "-c":
         except socket.timeout:
             if not interrupted_flow:
                 interrupted_flow = True
-                #dc.collect_interrupted_flow(source_id, packet_number, server_timestamp, local_timestamp)
-                print 'Interrupted Flow; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+                dc.collect_interrupted_flow(source_id, packet_number, server_timestamp, local_timestamp)
+                #print 'Interrupted Flow; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
 
         
 elif sys.argv[1] == "-m":
