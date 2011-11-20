@@ -405,28 +405,29 @@ class InstallationManager(threading.Thread):
             jsonEvent = self.socket.recv()
             event = EventFactory().decodeJson( jsonEvent )
             if event.type == "entry":
-                print 'Entry Event received.'
+                #print 'Entry Event received.'
                 self.dc.collect_begin_paths(len(self.active_hosts), time.time())
                 self.entry_event(event)
                 self.dc.collect_end_paths(len(self.active_hosts), time.time())
             elif event.type == "exit":
-                print 'Exit Event received.'
+                #print 'Exit Event received.'
                 self.dc.collect_begin_paths(len(self.active_hosts), time.time())
                 self.exit_event(event)
                 self.dc.collect_end_paths(len(self.active_hosts), time.time())
             elif event.type == "changeSource":
-                print 'Change Source Event received'
+                #print 'Change Source Event received'
                 self.dc.collect_begin_paths(len(self.active_hosts), time.time())
                 self.change_source_event(event)
                 self.dc.collect_end_paths(len(self.active_hosts), time.time())
             else:
-                print 'Invalid event received.'
+                #print 'Invalid event received.'
                 continue
             
             if self.nox != None:
                 self.dc.collect_event_effects(event, len(self.installs_to_do), len(self.installs_to_remove), time.time())
-                
+                self.collect_begin_installs()
                 self.nox.install_routes()
+                self.collect_end_installs()
             else:
                 print '\n\nInstalls to do:'
                 for install in self.get_installs_to_do():

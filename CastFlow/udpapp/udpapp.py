@@ -200,16 +200,15 @@ elif sys.argv[1] == "-c":
     sock.bind( (UDP_IP,UDP_PORT) )
 
     uuidstr = HOST_NAME + '---' + str(uuid.uuid4())
-    dc = UdpAppCollector(prename = 'udpapp-' + HOST_NAME + '---', format = FORMAT_MODE)
+    #dc = UdpAppCollector(prename = 'udpapp-' + HOST_NAME + '---', format = FORMAT_MODE)
 
     data, addr = sock.recvfrom( 1024 )   # buffer size is 1024 bytes
 
     local_timestamp = repr( time.time() )
     source_id, packet_number, server_timestamp = parse_packet(data)
-    print 'First Packet Received!'
-    #print source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
-    dc.write_header()
-    dc.collect_first_package(source_id, packet_number, server_timestamp, local_timestamp)
+    print 'First Packet; ', + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+    #dc.write_header()
+    #dc.collect_first_package(source_id, packet_number, server_timestamp, local_timestamp)
 
     sock.settimeout(1) #timeout setted to 1s.
 
@@ -226,17 +225,17 @@ elif sys.argv[1] == "-c":
             source_id, packet_number, server_timestamp = parse_packet(data)
             if interrupted_flow:
                 interrupted_flow = False
-                print 'Resumed Flow!'
-                dc.collect_resumed_flow(source_id, packet_number, server_timestamp, local_timestamp)
+                print 'Resumed Flow; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+                #dc.collect_resumed_flow(source_id, packet_number, server_timestamp, local_timestamp)
             
             #print source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
             if current_source_id != source_id:
-                dc.collect_source_changed(source_id, packet_number, server_timestamp, local_timestamp)
-                print 'Source Changed!'
+                #dc.collect_source_changed(source_id, packet_number, server_timestamp, local_timestamp)
+                print 'Source Changed; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
             elif last_packet_number - long(packet_number) > 1:
-                dc.collect_package_lost(source_id, str(last_packet_number), 
-                                        packet_number, server_timestamp, local_timestamp)
-                print 'Packet Lost!'
+                #dc.collect_package_lost(source_id, str(last_packet_number), 
+                                        #packet_number, server_timestamp, local_timestamp)
+                print 'Packet Lost; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
             
             # Save the informations
             current_source_id = source_id
@@ -247,8 +246,8 @@ elif sys.argv[1] == "-c":
         except socket.timeout:
             if not interrupted_flow:
                 interrupted_flow = True
-                dc.collect_interrupted_flow(source_id, packet_number, server_timestamp, local_timestamp)
-                print 'Interrupted Flow!'
+                #dc.collect_interrupted_flow(source_id, packet_number, server_timestamp, local_timestamp)
+                print 'Interrupted Flow; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
 
         
 elif sys.argv[1] == "-m":
