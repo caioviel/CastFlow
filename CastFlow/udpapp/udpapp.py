@@ -206,7 +206,7 @@ elif sys.argv[1] == "-c":
 
     local_timestamp = repr( time.time() )
     source_id, packet_number, server_timestamp = parse_packet(data)
-    print 'First Packet; ', + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+    print 'First Packet; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
     #dc.write_header()
     #dc.collect_first_package(source_id, packet_number, server_timestamp, local_timestamp)
 
