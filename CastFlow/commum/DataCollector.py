@@ -34,11 +34,11 @@ class DataCollector(object):
         else:
             self.file.write( header + '\n' )
 
-        self.file.flush()
+        #self.file.flush()
             
     def collect(self, str_data):
         self.file.write(str_data + "\n")
-        self.file.flush()
+        #self.file.flush()
 
 class NoxAppCollector(DataCollector):
     def __init__(self, prename='noxapp'):
@@ -84,6 +84,7 @@ class NoxAppCollector(DataCollector):
         str_out += '\n\tactive_nodes\t' + str(active_nodes)
         str_out += '\n\ttime\t\t' + str(time)
         self.collect(str_out + '\n')
+        self.file.flush()
     
     def collect_event_effects(self, event, routes_to_install, routes_to_remove, time, ):
         str_out = ''

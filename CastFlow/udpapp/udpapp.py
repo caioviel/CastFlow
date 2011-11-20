@@ -41,7 +41,7 @@ class DataCollector(object):
         else:
             self.file.write( header + '\n' )
 
-        self.file.flush()
+        #self.file.flush()
             
     def collect(self, str_data):
         self.file.write(str_data + "\n")
@@ -204,15 +204,15 @@ elif sys.argv[1] == "-c":
     sock.bind( (UDP_IP,UDP_PORT) )
 
     uuidstr = HOST_NAME + '---' + str(uuid.uuid4())
-    #dc = UdpAppCollector(prename = 'udpapp-' + HOST_NAME + '---', format = FORMAT_MODE)
+    dc = UdpAppCollector(prename = 'udpapp-' + HOST_NAME + '---', format = FORMAT_MODE)
 
     data, addr = sock.recvfrom( 1024 )   # buffer size is 1024 bytes
 
     local_timestamp = repr( time.time() )
     source_id, packet_number, server_timestamp = parse_packet(data)
     print 'First Packet; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
-    #dc.write_header()
-    #dc.collect_first_package(source_id, packet_number, server_timestamp, local_timestamp)
+    dc.write_header()
+    dc.collect_first_package(source_id, packet_number, server_timestamp, local_timestamp)
 
     sock.settimeout(1) #timeout setted to 1s.
 
