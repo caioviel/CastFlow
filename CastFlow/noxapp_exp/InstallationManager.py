@@ -359,10 +359,12 @@ class InstallationManager(threading.Thread):
         return all_installs
     
     def collect_begin_installs(self):
-        self.dc.collect_begin_installing_flows(len(self.topology.hosts), len(self.active_hosts), time.time())
+        temp_time = time.time()
+        self.dc.collect_begin_installing_flows(len(self.topology.hosts), len(self.active_hosts), temp_time)
         
     def collect_end_installs(self):
-        self.dc.collect_end_installing_flows(len(self.topology.hosts), len(self.active_hosts), time.time())
+        temp_time = time.time()
+        self.dc.collect_end_installing_flows(len(self.topology.hosts), len(self.active_hosts), temp_time)
     
     def run(self):
         #Send a Request Start to the server
@@ -406,25 +408,32 @@ class InstallationManager(threading.Thread):
             event = EventFactory().decodeJson( jsonEvent )
             if event.type == "entry":
                 #print 'Entry Event received.'
-                self.dc.collect_begin_paths(len(self.active_hosts), time.time())
+                temp_time = time.time()
+                self.dc.collect_begin_paths(len(self.active_hosts), temp_time)
                 self.entry_event(event)
-                self.dc.collect_end_paths(len(self.active_hosts), time.time())
+                temp_time = time.time()
+                self.dc.collect_end_paths(len(self.active_hosts), temp_time)
             elif event.type == "exit":
                 #print 'Exit Event received.'
-                self.dc.collect_begin_paths(len(self.active_hosts), time.time())
+                temp_time = time.time()
+                self.dc.collect_begin_paths(len(self.active_hosts), temp_time)
                 self.exit_event(event)
-                self.dc.collect_end_paths(len(self.active_hosts), time.time())
+                temp_time = time.time()
+                self.dc.collect_end_paths(len(self.active_hosts), temp_time)
             elif event.type == "changeSource":
                 #print 'Change Source Event received'
-                self.dc.collect_begin_paths(len(self.active_hosts), time.time())
+                temp_time = time.time()
+                self.dc.collect_begin_paths(len(self.active_hosts), temp_time)
                 self.change_source_event(event)
-                self.dc.collect_end_paths(len(self.active_hosts), time.time())
+                temp_time = time.time()
+                self.dc.collect_end_paths(len(self.active_hosts), temp_time)
             else:
                 #print 'Invalid event received.'
                 continue
             
             if self.nox != None:
-                self.dc.collect_event_effects(event, len(self.installs_to_do), len(self.installs_to_remove), time.time())
+                temp_time = time.time()
+                self.dc.collect_event_effects(event, len(self.installs_to_do), len(self.installs_to_remove), temp_time)
                 self.collect_begin_installs()
                 self.nox.install_routes()
                 self.collect_end_installs()
