@@ -50,7 +50,7 @@ class NoxAppCollector(DataCollector):
     def collect_begin_mst(self, total_nodes, time):
         str_out = 'BEGIN MST:' 
         str_out += '\n\ttotal_nodes\t' + repr(total_nodes)
-        str_out += '\n\ttime\t\t' + strrepr(time)
+        str_out += '\n\ttime\t\t' + repr(time)
         self.collect(str_out + '\n')
     
     def collect_end_mst(self, total_nodes, time):
