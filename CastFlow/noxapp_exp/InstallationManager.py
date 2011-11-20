@@ -22,7 +22,6 @@ class InstallPath:
         self.needRewrite = False
         self.dst_mac = ''
         self.dst_ip = ''
-        self.samples_number = -1
         
     def addOutputPort(self, portnumber):
         self.outputPorts.append(portnumber)
@@ -55,6 +54,7 @@ class InstallationManager(threading.Thread):
         threading.Thread.__init__(self)
         self.__connect__()
         self.req_number = 0
+        self.samples_number = -1
         
         #Get the Topology from Topology Server
         self.__get_topology__()
@@ -378,7 +378,7 @@ class InstallationManager(threading.Thread):
         request.action = request.ACTION.REGISTER_FOR_EVENTS
         jsonMessage = request.toJson()
         self.socket.send( jsonMessage )
-        sleep(1)
+        #sleep(1)
         last_entry = False
         samples_collected = 0
         
