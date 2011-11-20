@@ -77,6 +77,7 @@ class pytutorial(Component):
             self.im.nox = self
             self.samples_number = 10
             self.install_routes()
+            self.start()
 
         return CONTINUE
 
