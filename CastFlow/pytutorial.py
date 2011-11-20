@@ -75,7 +75,7 @@ class pytutorial(Component):
         if self.im == None:
             self.im = InstallationManager()
             self.im.nox = self
-            self.im.samples_number = 10
+            #self.im.samples_number = 10
             self.install_routes()
             self.im.start()
 

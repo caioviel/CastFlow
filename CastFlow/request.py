@@ -86,6 +86,26 @@ def start():
                 print host.id,
             print '\n'
 
+def entryEvent():
+    s = initsocket()
+    request = Request()
+    request.id = 1
+    request.action = request.ACTION.ENTRY_EVENT
+    s.send (request.toJson() )
+
+def exitEvent():
+    s = initsocket()
+    request = Request()
+    request.id = 1
+    request.action = request.ACTION.EXIT_EVENT
+    s.send (request.toJson() )
+
+def sourceEvent():
+    s = initsocket()
+    request = Request()
+    request.id = 1
+    request.action = request.ACTION.SOURCE_EVENT
+    s.send (request.toJson() )
     
 def getCompleteGroup():
     s = initsocket()
@@ -171,6 +191,12 @@ if request_type == 'getTopology':
     getTopology()
 elif request_type == 'start':
     start()
+elif request_type == 'entryEvent':
+    entryEvent()
+elif request_type == 'exitEvent':
+    exitEvent()
+elif request_type == 'sourceEvent':
+    sourceEvent()
 elif request_type == 'getGroup':
     getGroup()
 elif request_type == 'getCompleteGroup':
