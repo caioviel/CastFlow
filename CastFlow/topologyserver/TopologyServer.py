@@ -55,10 +55,6 @@ class TopologyServer(InternalInterface):
         return group
     
     def addEventListeners(self, handler):
-        if self.generate_events:
-            if not self.topologyManager.is_running:
-                self.topologyManager.startEvents()
-        
         if handler not in self.eventListeners:
             self.eventListeners.append(handler)
             print 'Client', handler.address, 'is listening for events.'
@@ -98,6 +94,10 @@ class TopologyServer(InternalInterface):
             self.eventListeners.remove(handler)
     
     def notifyStart(self, request):
+        if self.generate_events:
+            if not self.topologyManager.is_running:
+                self.topologyManager.startEvents()
+                
         for toNotify in self.startListeners:
             notifier = AsynchronousNotifier(toNotify, request)
             notifier.doNotify()

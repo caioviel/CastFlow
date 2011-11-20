@@ -55,6 +55,35 @@ def getGroup():
     print 'Multicast Group:'
     printGroup(group)
     
+def start():
+    s = initsocket()
+    request = Request()
+    request.id = 1
+    request.action = request.ACTION.REGISTER_FOR_EVENTS
+    s.send (request.toJson() )
+    
+    request = Request()
+    request.id = 2
+    request.action = request.ACTION.START
+    jsonStr = request.toJson()
+    s.send ( jsonStr )
+    print 'Start!'
+    
+    print 'Waiting for events...'
+    while True:
+        jsonStr = s.recv()
+        event = EventFactory().decodeJson(jsonStr)
+        print 'Event Received:'
+        print '\tType:', event.type
+        if event.type == 'changeSource':
+            print '\nNew Source:', event.source
+        else:
+            print '\tHosts:',
+            for host in event.hosts:
+                print host.id,
+            print '\n'
+
+    
 def getCompleteGroup():
     s = initsocket()
     request = Request()
@@ -137,6 +166,8 @@ request_type = sys.argv[1]
 
 if request_type == 'getTopology':
     getTopology()
+elif request_type == 'start':
+    start()
 elif request_type == 'getGroup':
     getGroup()
 elif request_type == 'getCompleteGroup':

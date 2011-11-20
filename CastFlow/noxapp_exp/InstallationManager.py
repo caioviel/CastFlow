@@ -364,11 +364,11 @@ class InstallationManager(threading.Thread):
     
     def run(self):
         #Send a Request Start to the server
-        request = Request()
-        request.id = self.__next_req_number__()
-        request.action = request.ACTION.START
-        jsonMessage = request.toJson()
-        self.socket.send( jsonMessage )
+        #request = Request()
+        #request.id = self.__next_req_number__()
+        #request.action = request.ACTION.START
+        #jsonMessage = request.toJson()
+        #self.socket.send( jsonMessage )
         
         #Send a Request Register for Events
         request = Request()
@@ -434,6 +434,7 @@ class InstallationManager(threading.Thread):
         
         new_installs = self.__generate_installs__()
         self.installs_to_do = []
+        self.installs_to_remove = []
         for install in new_installs:
             old_install = self.installs_by_router.get(install.routerId)
             if old_install == None:

@@ -155,7 +155,9 @@ class TopologyManager(threading.Thread):
         generate_exit = True
         while self.is_running:
             #Dormir um tempo aleatorio seguindo uma distrubuicao normal de media 40 e variancia 5 (em segundos)
-            sleepingTime = numpy.random.normal(self.interval_mediam, self.interval_mediam)
+            sleepingTime = 0
+            while sleepingTime <= 0:
+                sleepingTime = numpy.random.normal(self.interval_mediam, self.interval_mediam)
             print 'Sleeping for', sleepingTime
             time.sleep(sleepingTime)
             
