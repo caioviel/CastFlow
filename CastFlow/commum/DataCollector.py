@@ -74,7 +74,7 @@ class NoxAppCollector(DataCollector):
     def collect_begin_installing_flows(self, total_nodes, active_nodes, time):
         str_out = 'BEGIN INSTALLING FLOWS:' 
         str_out += '\n\ttotal_nodes\t' + str(total_nodes)
-        str_out += '\n\tactive_nodes\t' + repr(active_nodes)
+        str_out += '\n\tactive_nodes\t' + str(active_nodes)
         str_out += '\n\ttime\t\t' + repr(time)
         self.collect(str_out + '\n')
     
@@ -82,7 +82,7 @@ class NoxAppCollector(DataCollector):
         str_out = 'END INSTALLING FLOWS:' 
         str_out += '\n\ttotal_nodes\t' + str(total_nodes)
         str_out += '\n\tactive_nodes\t' + str(active_nodes)
-        str_out += '\n\ttime\t\t' + str(time)
+        str_out += '\n\ttime\t\t' + repr(time)
         self.collect(str_out + '\n')
         self.file.flush()
     

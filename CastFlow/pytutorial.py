@@ -46,7 +46,6 @@ class pytutorial(Component):
             attrs[core.IN_PORT] = install.inputPort
             self.im.collect_begin_installs()
             self.delete_datapath_flow(install.routerId, attrs)
-            self.im.collect_end_installs()
             
         print '********** FINISHED INSTALLATION ***********'
 
