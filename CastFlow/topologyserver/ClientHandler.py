@@ -77,6 +77,7 @@ class ClientHandler(threading.Thread):
                     self.request_source_event(request)
                 
                 else:
+                    print '\tInvalid Request type received from client', self.address
                     return 'none'
                 
         except RuntimeError as inst:

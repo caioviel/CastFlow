@@ -121,8 +121,8 @@ class InstallationManager(threading.Thread):
         self.has_installation = True
         
         #Start listening to events
-        self.start()
         self.nox = None
+        #self.start()
         
     def __connect__(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -398,6 +398,8 @@ class InstallationManager(threading.Thread):
                         self.socket.send( jsonMessage )
                         samples_collected += 1
                 else:
+                    print '\n\n\n\n\n\n\n'
+                    print '***************** Experiment Finished! *******************'
                     sys.exit()
             
             jsonEvent = self.socket.recv()
@@ -577,4 +579,5 @@ if __name__ == '__main__':
     print '\n\nInstalls to remove:'
     for install in im.get_installs_to_remove():
         print '\t', install
+    im.start()
         

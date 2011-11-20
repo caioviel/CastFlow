@@ -405,7 +405,7 @@ class Request:
             return self.ACTION.ENTRY_GROUP
         elif actionStr == 'changeSource':
             return self.ACTION.CHANGE_SOURCE
-        elif actionStr == 'changeSource':
+        elif actionStr == 'entryEvent':
             return self.ACTION.ENTRY_EVENT
         elif actionStr == 'exitEvent':
             return self.ACTION.EXIT_EVENT
