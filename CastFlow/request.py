@@ -4,6 +4,7 @@ import sys
 
 from commum.Model import *
 from commum.util import *
+from time import sleep
 
 def printGroup(group):
     print '\tTotal Hosts:', len(group.hosts)
@@ -62,6 +63,7 @@ def start():
     request.action = request.ACTION.REGISTER_FOR_EVENTS
     s.send (request.toJson() )
     
+    sleep(1)
     request = Request()
     request.id = 2
     request.action = request.ACTION.START

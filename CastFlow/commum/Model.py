@@ -417,6 +417,7 @@ class RequestFactory:
         return request
     
     def decodeJson(self, jsonStr):
+        print jsonStr
         objs = json.loads(jsonStr)
-        print objs
+        #print objs
         return self.internal_decodeJson(objs)

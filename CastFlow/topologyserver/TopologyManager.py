@@ -176,7 +176,7 @@ class TopologyManager(threading.Thread):
                 event = self.generateEntryEvent()
                 
             generate_exit = not generate_exit
-            print event.hosts
+            #print event.hosts
             
             if len(event.hosts) > 0:
                 print 'Event generated.'
