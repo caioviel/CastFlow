@@ -66,6 +66,7 @@ def start():
     request.id = 2
     request.action = request.ACTION.START
     jsonStr = request.toJson()
+    print jsonStr
     s.send ( jsonStr )
     print 'Start!'
     
