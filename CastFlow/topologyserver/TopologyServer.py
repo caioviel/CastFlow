@@ -73,7 +73,7 @@ class TopologyServer(InternalInterface):
         
     def entryEvent(self, request):
         event = None
-        if request.ACTION.ENTRY_EVENT:
+        if request.action == request.ACTION.ENTRY_EVENT:
             event = self.topologyManager.generateEntryEvent()
         else:
             event = self.topologyManager.forceEntryEvent(request.hosts)
@@ -82,7 +82,7 @@ class TopologyServer(InternalInterface):
     
     def exitEvent(self, request):
         event = None
-        if request.ACTION.EXIT_EVENT:
+        if request.action == action.ACTION.EXIT_EVENT:
             event = self.topologyManager.generateExitEvent()
         else:
             event = self.topologyManager.forceExitEvent(request.hosts)
@@ -92,10 +92,7 @@ class TopologyServer(InternalInterface):
             
     def changeSource(self, request):
         event = None
-        if request.ACTION.ENTRY_EVENT:
-            pass
-        else:
-            event = self.topologyManager.forceChangeSource(request.source)
+        event = self.topologyManager.forceChangeSource(request.source)
         if event != None:
             self.notifyEvent(event)
     
