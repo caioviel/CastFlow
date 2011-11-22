@@ -35,6 +35,8 @@ class pytutorial(Component):
 
             for port in install.outputPorts:
                 actions.append( [openflow.OFPAT_OUTPUT, [0, port] ] )
+                
+            self.install_datapath_flow(install.routerId, attrs, 3600, 3600, actions, None, openflow.OFP_DEFAULT_PRIORITY, install.inputPort, None)
             
         print '********** REMOVING OBSOLUTE ROUTES ***********'
         removes = self.im.installs_to_remove
@@ -72,7 +74,7 @@ class pytutorial(Component):
         if self.im == None:
             self.im = InstallationManager()
             self.im.nox = self
-            self.im.samples_number = 10
+            #self.im.samples_number = 10
             self.im.collect_begin_installs()
             self.install_routes()
             self.im.collect_end_installs()

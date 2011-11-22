@@ -82,7 +82,7 @@ class TopologyServer(InternalInterface):
     
     def exitEvent(self, request):
         event = None
-        if request.action == action.ACTION.EXIT_EVENT:
+        if request.action == request.ACTION.EXIT_EVENT:
             event = self.topologyManager.generateExitEvent()
         else:
             event = self.topologyManager.forceExitEvent(request.hosts)
