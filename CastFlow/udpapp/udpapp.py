@@ -240,8 +240,7 @@ elif sys.argv[1] == "-c":
                 #dc.collect_source_changed(source_id, packet_number, server_timestamp, local_timestamp)
                 str_output += 'Source Changed; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
             elif last_packet_number - long(packet_number) > 1:
-                #dc.collect_package_lost(source_id, str(last_packet_number), 
-                                        packet_number, server_timestamp, local_timestamp)
+                #dc.collect_package_lost(source_id, str(last_packet_number), packet_number, server_timestamp, local_timestamp)
                 str_output += 'Packet Lost; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
             
             # Save the informations
