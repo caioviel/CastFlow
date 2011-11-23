@@ -239,8 +239,8 @@ elif sys.argv[1] == "-c":
             local_timestamp = repr( time.time() )
             source_id, packet_number, server_timestamp = parse_packet(data)
             if interrupted_flow:
+                interrupted_flow = False
                 if WRITE_EVENT:
-                    interrupted_flow = False
                     str_output += 'Resumed Flow; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp + '\n'
                 
                 if PRINT_EVENT:
