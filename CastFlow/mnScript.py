@@ -42,8 +42,8 @@ def mnScript():
     
     request = Request()
     request.id = 1
-    #request.action = request.ACTION.GET_GROUP
-    request.action = request.ACTION.GET_COMPLETE_GROUP
+    request.action = request.ACTION.GET_GROUP
+    #request.action = request.ACTION.GET_COMPLETE_GROUP
 
     s.send (request.toJson() )
     jsonStr = s.recv()
@@ -63,7 +63,7 @@ def mnScript():
             print "*** Setup CA:FE ARP in " + h.name
             h.cmd("arp -s 10.0.2.254 ca:fe:ca:fe:ca:fe")
             print "*** Starting udpapp in " + h.name
-            h.cmd("udpapp -c " + h.name  + " &")
+            #h.cmd("udpapp -c " + h.name  + " &")
             #sleep( 1 )
 
     print "*** Starting CLI ***"

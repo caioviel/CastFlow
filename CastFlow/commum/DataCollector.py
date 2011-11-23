@@ -43,6 +43,7 @@ class DataCollector(object):
 class NoxAppCollector(DataCollector):
     def __init__(self, prename='noxapp'):
         DataCollector.__init__(self, prename)
+        self.str_out = ""
         
     def write_header(self):
         DataCollector.write_header(self, 'NoxAppCollector')
@@ -51,39 +52,46 @@ class NoxAppCollector(DataCollector):
         str_out = 'BEGIN MST:' 
         str_out += '\n\ttotal_nodes\t' + repr(total_nodes)
         str_out += '\n\ttime\t\t' + repr(time)
-        self.collect(str_out + '\n')
+        self.str_out += str_out + '\n'
+        #self.collect(str_out + '\n')
     
     def collect_end_mst(self, total_nodes, time):
         str_out = 'END MST:' 
         str_out += '\n\ttotal_nodes\t' + repr(total_nodes)
         str_out += '\n\ttime\t\t' + repr(time)
-        self.collect(str_out + '\n')
+        self.str_out += str_out + '\n'
+        #self.collect(str_out + '\n')
     
     def collect_begin_paths(self, total_nodes, time):
         str_out = 'BEGIN PATHS:' 
         str_out += '\n\ttotal_nodes\t' + repr(total_nodes)
         str_out += '\n\ttime\t\t' + repr(time)
-        self.collect(str_out + '\n')
+        self.str_out += str_out + '\n'
+        #self.collect(str_out + '\n')
     
     def collect_end_paths(self, total_nodes, time):
         str_out = 'END PATHS:' 
         str_out += '\n\ttotal_nodes\t' + repr(total_nodes)
         str_out += '\n\ttime\t\t' + repr(time)
-        self.collect(str_out + '\n')
+        self.str_out += str_out + '\n'
+        #self.collect(str_out + '\n')
     
     def collect_begin_installing_flows(self, total_nodes, active_nodes, time):
         str_out = 'BEGIN INSTALLING FLOWS:' 
         str_out += '\n\ttotal_nodes\t' + str(total_nodes)
         str_out += '\n\tactive_nodes\t' + str(active_nodes)
         str_out += '\n\ttime\t\t' + repr(time)
-        self.collect(str_out + '\n')
+        self.str_out += str_out  + '\n'
+        #self.collect(str_out + '\n')
     
     def collect_end_installing_flows(self, total_nodes, active_nodes, time):
         str_out = 'END INSTALLING FLOWS:' 
         str_out += '\n\ttotal_nodes\t' + str(total_nodes)
         str_out += '\n\tactive_nodes\t' + str(active_nodes)
-        str_out += '\n\ttime\t\t' + repr(time)
-        self.collect(str_out + '\n')
+        str_out += '\n\ttime\t\t' + repr(time) 
+        self.str_out += str_out + '\n'
+        self.collect(self.str_out + '\n')
+        self.str_out = ""
         self.file.flush()
     
     def collect_event_effects(self, event, routes_to_install, routes_to_remove, time, ):
@@ -106,7 +114,8 @@ class NoxAppCollector(DataCollector):
         str_out += '\n\tinstalls\t' + str(routes_to_install)
         str_out += '\n\tremoves\t' + repr(routes_to_remove)
         str_out += '\n\ttime\t\t' + repr(time)
-        self.collect(str_out + '\n')
+        self.str_out += str_out + '\n'
+        #self.collect(str_out + '\n')
 
 class UdpAppCollector(DataCollector):
     def __init__(self, prename ='udpapp', format='human'):
