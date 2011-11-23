@@ -218,7 +218,7 @@ elif sys.argv[1] == "-c":
     source_id, packet_number, server_timestamp = parse_packet(data)
     if WRITE_EVENT:
         str_output = ""
-        str_output += 'First Packet; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+        str_output += 'First Packet; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp + '\n'
         
     if PRINT_EVENT or PRINT_PACKET:
         print 'First Packet; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
@@ -241,7 +241,7 @@ elif sys.argv[1] == "-c":
             if interrupted_flow:
                 if WRITE_EVENT:
                     interrupted_flow = False
-                    str_output += 'Resumed Flow; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+                    str_output += 'Resumed Flow; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp + '\n'
                 
                 if PRINT_EVENT:
                     print 'Resumed Flow; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
@@ -251,14 +251,14 @@ elif sys.argv[1] == "-c":
                 
             if current_source_id != source_id:
                 if WRITE_EVENT:
-                    str_output += 'Source Changed; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+                    str_output += 'Source Changed; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp + '\n'
                 
                 if PRINT_EVENT:
                     print 'Source Changed; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
                     
             elif last_packet_number - long(packet_number) > 1:
                 if WRITE_EVENT:
-                    str_output += 'Packet Lost; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+                    str_output += 'Packet Lost; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp + '\n'
                 
                 if PRINT_EVENT:
                     print 'Packet Lost; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
@@ -274,7 +274,7 @@ elif sys.argv[1] == "-c":
                 interrupted_flow = True
                 interrupted_count = 0
                 if WRITE_EVENT:
-                    str_output += 'Interrupted Flow; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
+                    str_output += 'Interrupted Flow; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp + '\n'
                 
                 if PRINT_EVENT:
                     print 'Interrupted Flow; ' + source_id + '; ' + packet_number + '; ' + server_timestamp + '; ' + local_timestamp
